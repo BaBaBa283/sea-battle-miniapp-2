@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 # ⚠️ ЭТУ ССЫЛКУ МЫ ПОЛУЧИМ ПОСЛЕ ДЕПЛОЯ НА RENDER
 # Пока оставь заглушку, потом заменишь!
-WEBAPP_URL = "https://sea-battle-miniapp.onrender.com"
+WEBAPP_URL = "https://sea-battle-miniapp-2.onrender.com"
 
 # Клавиатура с Mini App
 mini_app_keyboard = InlineKeyboardMarkup(
