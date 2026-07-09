@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=360, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Морской бой</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -11,27 +11,31 @@
     <div id="app">
         <!-- Шапка -->
         <div id="header">
-            <h1>Морской бой</h1>
-            <div id="status">🎯 Ваш ход</div>
+            <h1>⚓️ Морской бой</h1>
+            <div id="status" class="player-turn">🎯 Ваш ход</div>
         </div>
 
-        <!-- Игровые поля (друг под другом) -->
+        <!-- Игровые поля -->
         <div id="game-container">
-            <div id="player-board">
-                <h3>🚢 Ваше поле</h3>
-                <div id="player-grid" class="grid-container"></div>
+            <div id="player-board" class="board-block">
+                <h3>Ваше поле</h3>
+                <div id="player-grid" class="grid"></div>
             </div>
 
-            <div id="computer-board">
-                <h3>🎯 Поле противника</h3>
-                <div id="computer-grid" class="grid-container"></div>
+            <div id="computer-board" class="board-block">
+                <h3>Поле противника</h3>
+                <div id="computer-grid" class="grid"></div>
             </div>
         </div>
 
         <!-- Кнопки управления -->
         <div id="controls">
-            <button id="new-game-btn" class="btn-primary">🔄 Новая игра</button>
-            <button id="close-btn" class="btn-secondary">⬅️ Закрыть</button>
+            <button id="new-game-btn" class="btn-primary">
+                <span class="btn-icon">🔄</span><span>Новая игра</span>
+            </button>
+            <button id="close-btn" class="btn-secondary">
+                <span class="btn-icon">⬅️</span><span>Закрыть</span>
+            </button>
         </div>
     </div>
 

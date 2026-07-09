@@ -2,59 +2,92 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
-    width: 360px;
-    height: 580px;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
+/* ============================================================
+   ТОКЕНЫ ТЕМЫ
+   Подхватываем цвета Telegram (var(--tg-theme-*) выставляются
+   telegram-web-app.js на :root), с "тетрадными" запасными
+   значениями для просмотра вне Telegram.
+   ============================================================ */
+:root {
+    --tg-bg:        var(--tg-theme-bg-color, #efe7d3);
+    --tg-secondary: var(--tg-theme-secondary-bg-color, #e3d9bc);
+    --tg-section:   var(--tg-theme-section-bg-color, #f7f2e4);
+    --tg-text:      var(--tg-theme-text-color, #2c3e50);
+    --tg-hint:      var(--tg-theme-hint-color, #8a7a5a);
+    --tg-link:      var(--tg-theme-link-color, #34495e);
+    --tg-button:    var(--tg-theme-button-color, #2c3e50);
+    --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+    --tg-destructive: var(--tg-theme-destructive-text-color, #e74c3c);
+
+    --ink:          var(--tg-text);
+    --pencil-line:  var(--tg-destructive);
+    --paper:        var(--tg-section);
+    --paper-frame:  var(--tg-secondary);
+    --grid-line:    rgba(138, 122, 90, 0.35);
+
+    --ship:         #34495e;
+    --ship-dark:    #2c3e50;
+    --hit:          var(--tg-destructive, #c0392b);
+    --hit-dark:     #922b21;
+    --miss:         #d9d2c2;
+    --sunk:         #232f3b;
+
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-l: env(safe-area-inset-left, 0px);
+    --safe-r: env(safe-area-inset-right, 0px);
+}
+
+html {
+    height: 100%;
+    /* используем высоту вьюпорта, которую сообщает Telegram */
+    height: var(--tg-viewport-stable-height, 100%);
 }
 
 body {
-    font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
-    background: #d4c9a8;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+    background: var(--tg-bg);
+    min-height: 100%;
+    min-height: var(--tg-viewport-stable-height, 100vh);
     display: flex;
     justify-content: center;
-    align-items: center;
-    background-image: 
-        linear-gradient(rgba(200, 180, 140, 0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(200, 180, 140, 0.3) 1px, transparent 1px);
+    align-items: flex-start;
+    padding: calc(12px + var(--safe-t)) calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l));
+    color: var(--ink);
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size: 20px 20px;
+    transition: background-color 0.25s ease;
 }
 
 #app {
-    width: 360px;
-    height: 580px;
-    background: #f5f0e8;
-    border-radius: 6px;
-    padding: 4px 6px;
-    box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.3),
-        inset 0 0 0 2px #e8e0d0,
-        inset 0 0 0 4px #d4c9a8;
-    border: 1px solid #b8a88a;
+    max-width: 720px;
+    width: 100%;
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 18px 16px 20px;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.18),
+        inset 0 0 0 1px var(--paper-frame);
     position: relative;
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
 }
 
+/* Эффект тетрадного листа */
 #app::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        linear-gradient(rgba(180, 160, 130, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(180, 160, 130, 0.08) 1px, transparent 1px);
-    background-size: 20px 20px;
+    inset: 0;
+    background:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 18px 18px;
+    opacity: 0.35;
     pointer-events: none;
-    border-radius: 6px;
-    z-index: 0;
 }
 
 #app > * {
@@ -62,399 +95,352 @@ body {
     z-index: 1;
 }
 
+/* ---------- Шапка ---------- */
 #header {
     text-align: center;
-    margin-bottom: 2px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
     position: relative;
-    padding-bottom: 2px;
-    flex-shrink: 0;
 }
 
 #header::after {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 10%;
-    right: 10%;
+    left: 8%;
+    right: 8%;
     height: 2px;
-    background: #e74c3c;
-    opacity: 0.6;
+    background: var(--pencil-line);
+    opacity: 0.55;
+    border-radius: 2px;
 }
 
 #header h1 {
-    font-size: 14px;
+    font-size: 22px;
     font-weight: 700;
-    color: #2c3e50;
-    font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
-    letter-spacing: 1px;
-    position: relative;
-    display: inline-block;
-    line-height: 1.2;
-}
-
-#header h1::before {
-    content: '✏️';
-    margin-right: 2px;
-    font-size: 11px;
-}
-
-#header h1::after {
-    content: '📓';
-    margin-left: 2px;
-    font-size: 11px;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
 }
 
 #status {
-    font-size: 10px;
+    font-size: 15px;
     font-weight: 600;
-    padding: 1px 8px;
-    border-radius: 3px;
+    padding: 7px 18px;
+    border-radius: 20px;
     display: inline-block;
-    background: rgba(255, 255, 255, 0.7);
-    color: #2c3e50;
-    border: 1.5px solid #b8a88a;
-    font-family: 'Courier New', monospace;
-    min-width: 70px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-    margin-top: 1px;
-    line-height: 1.3;
+    background: rgba(138, 122, 90, 0.12);
+    color: var(--ink);
+    border: 1.5px solid var(--paper-frame);
+    min-width: 160px;
+    transition: all 0.2s ease;
 }
 
 #status.player-turn {
     color: #27ae60;
     border-color: #27ae60;
-    background: rgba(39, 174, 96, 0.1);
+    background: rgba(39, 174, 96, 0.12);
 }
 
 #status.computer-turn {
-    color: #e74c3c;
-    border-color: #e74c3c;
+    color: var(--hit);
+    border-color: var(--hit);
     background: rgba(231, 76, 60, 0.1);
 }
 
 #status.game-over-win {
     color: #27ae60;
     border-color: #27ae60;
-    background: rgba(39, 174, 96, 0.15);
+    background: rgba(39, 174, 96, 0.16);
     animation: winPulse 1s ease-in-out infinite;
 }
 
 #status.game-over-lose {
-    color: #e74c3c;
-    border-color: #e74c3c;
-    background: rgba(231, 76, 60, 0.15);
+    color: var(--hit);
+    border-color: var(--hit);
+    background: rgba(231, 76, 60, 0.16);
     animation: losePulse 1s ease-in-out infinite;
 }
 
 @keyframes winPulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+    50% { transform: scale(1.03); }
 }
 
 @keyframes losePulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(0.98); }
+    50% { transform: scale(0.97); }
 }
 
+/* ---------- Поля ---------- */
 #game-container {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    justify-content: center;
-    flex: 1;
-    min-height: 0;
-    margin: 1px 0;
+    gap: 20px;
+    margin: 8px 0 4px;
 }
 
-#player-board, #computer-board {
+.board-block {
     text-align: center;
-    flex-shrink: 0;
 }
 
-#player-board h3, #computer-board h3 {
-    margin-bottom: 1px;
-    font-size: 8px;
-    color: #2c3e50;
-    font-weight: 600;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.5px;
+.board-block h3 {
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--tg-hint);
+    letter-spacing: 1.2px;
     text-transform: uppercase;
-    background: rgba(255, 255, 255, 0.5);
-    display: inline-block;
-    padding: 0 5px;
-    border-radius: 2px;
-    border: 1px dashed #b8a88a;
-    line-height: 1.2;
 }
 
-#player-board h3::before {
-    content: '🚢 ';
-    font-size: 7px;
-}
-
-#computer-board h3::before {
-    content: '🎯 ';
-    font-size: 7px;
-}
-
-/* ============ КОНТЕЙНЕР ПОЛЯ ============ */
-.grid-container {
-    display: inline-block;
-    background: #f5f0e8;
-    padding: 1px;
-    border-radius: 2px;
-    width: 100%;
-    max-width: 280px;
-}
-
-/* ============ ЦИФРЫ СВЕРХУ (1-10) ============ */
-.board-top-labels {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 0.5px;
-    padding: 0 0 0.5px 13px;
-    margin-bottom: 0.5px;
-}
-
-.board-top-labels .label {
-    font-size: 7px;
-    font-weight: 600;
-    color: #7f8c8d;
-    text-align: center;
-    font-family: 'Courier New', monospace;
-    line-height: 1;
-    padding: 0;
-}
-
-/* ============ КОНТЕЙНЕР С БУКВАМИ И СЕТКОЙ ============ */
-.board-grid-wrapper {
-    display: grid;
-    grid-template-columns: 13px 1fr;
-    gap: 0.5px;
-    background: #f5f0e8;
-    padding: 0.5px;
-    border-radius: 2px;
-}
-
-/* ============ БУКВЫ СЛЕВА (A-J) ============ */
-.board-left-labels {
-    display: grid;
-    grid-template-rows: repeat(10, 1fr);
-    gap: 0.5px;
-}
-
-.board-left-labels .label {
-    font-size: 7px;
-    font-weight: 600;
-    color: #7f8c8d;
-    text-align: center;
-    font-family: 'Courier New', monospace;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 14px;
-    line-height: 1;
-}
-
-/* ============ САМО ПОЛЕ ============ */
+/* ---------- Сетка с координатами ----------
+   11x11: [0,0] пустой угол, [0,1..10] номера столбцов,
+   [1..10,0] буквы строк, остальное — игровые клетки. */
 .grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 0.5px;
-    background: #b8a88a;
-    padding: 0.5px;
-    border-radius: 2px;
-    border: 1.5px solid #8a7a5a;
+    grid-template-columns: 18px repeat(10, 1fr);
+    gap: 2px;
+    background: transparent;
+    max-width: 380px;
     width: 100%;
-    box-shadow: 
-        inset 0 0 6px rgba(0, 0, 0, 0.1),
-        0 2px 8px rgba(0, 0, 0, 0.12);
+    margin: 0 auto;
 }
 
 .cell {
-    aspect-ratio: 1;
-    background: #f5f0e8;
-    border-radius: 1px;
+    border-radius: 3px;
     cursor: pointer;
-    transition: all 0.1s ease;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
-    font-weight: bold;
-    color: #2c3e50;
+    font-weight: 700;
+    color: var(--ink);
     user-select: none;
-    min-height: 14px;
     position: relative;
-    font-family: 'Courier New', monospace;
+    font-variant-numeric: tabular-nums;
 }
 
-.cell:hover:not(.hit):not(.miss):not(.sunk):not(.miss-around-sunk):not(.disabled) {
-    background: #e8e0d0;
-    transform: scale(1.05);
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+/* координатные подписи (не кликабельны) */
+.cell.label {
+    background: transparent;
+    color: var(--tg-hint);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: default;
+    aspect-ratio: auto;
+}
+
+.cell.label.corner {
+    background: transparent;
+}
+
+/* игровые клетки — квадратные, задают высоту всей строки */
+.cell.data {
+    aspect-ratio: 1;
+    background: var(--paper-frame);
+    box-shadow: inset 0 0 0 1px rgba(138, 122, 90, 0.25);
+    font-size: 15px;
+    min-height: 26px;
+}
+
+.cell.data:not(.hit):not(.miss):not(.sunk):not(.miss-around-sunk):not(.disabled):hover {
+    background: #e8e0cd;
+    transform: scale(1.04);
     z-index: 2;
 }
 
-/* Корабль */
-.cell.ship {
-    background: #34495e;
-    border: 1px solid #2c3e50;
-    box-shadow: inset 0 0 0 1px #4a6a8a;
+.cell.data:not(.hit):not(.miss):not(.sunk):not(.miss-around-sunk):not(.disabled):active {
+    transform: scale(0.94);
 }
 
-.cell.ship::after {
+/* Корабль (виден только на своём поле) */
+.cell.data.ship {
+    background: var(--ship);
+    box-shadow: inset 0 0 0 1px var(--ship-dark);
+}
+
+.cell.data.ship::after {
     content: '⛵';
-    font-size: 7px;
-    opacity: 0.4;
+    font-size: 11px;
+    opacity: 0.45;
 }
 
 /* Попадание */
-.cell.hit {
-    background: #c0392b !important;
-    animation: hitAnim 0.2s ease;
-    border: 1px solid #922b21;
-    box-shadow: inset 0 0 10px rgba(192, 57, 43, 0.3);
+.cell.data.hit {
+    background: var(--hit) !important;
+    animation: hitAnim 0.3s ease;
+    box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.2);
 }
 
-.cell.hit::after {
+.cell.data.hit::after {
     content: '✕';
-    font-size: 11px;
-    color: white;
+    font-size: 16px;
+    color: #fff;
     font-weight: 900;
-    text-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Промах */
-.cell.miss {
-    background: #d5d0c4 !important;
-    border: 1px solid #b8a88a;
+.cell.data.miss {
+    background: var(--miss) !important;
+    box-shadow: inset 0 0 0 1px rgba(138, 122, 90, 0.3);
 }
 
-.cell.miss::after {
+.cell.data.miss::after {
     content: '•';
-    font-size: 13px;
-    color: #8a7a5a;
+    font-size: 20px;
+    color: var(--tg-hint);
 }
 
-/* Промах вокруг потопленного */
-.cell.miss-around-sunk {
-    background: #d5d0c4 !important;
-    border: 1px solid #b8a88a;
-    animation: rippleEffect 0.3s ease;
+.cell.data.miss-around-sunk {
+    background: var(--miss) !important;
+    animation: rippleEffect 0.5s ease;
 }
 
-.cell.miss-around-sunk::after {
+.cell.data.miss-around-sunk::after {
     content: '•';
-    font-size: 13px;
-    color: #8a7a5a;
+    font-size: 20px;
+    color: var(--tg-hint);
 }
 
 /* Потопленный корабль */
-.cell.sunk {
-    background: #2c3e50 !important;
-    animation: sunkAnim 0.3s ease;
-    border: 1px solid #1a252f;
-    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+.cell.data.sunk {
+    background: var(--sunk) !important;
+    animation: sunkAnim 0.45s ease;
+    box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.3);
 }
 
-.cell.sunk::after {
+.cell.data.sunk::after {
     content: '☠';
-    font-size: 13px;
-    color: #e74c3c;
-    text-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+    font-size: 17px;
+    color: var(--hit);
 }
 
-.cell.disabled {
+.cell.data.disabled {
     cursor: not-allowed;
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
 @keyframes hitAnim {
-    0% { transform: scale(0.7); background: #e74c3c; }
-    50% { transform: scale(1.08); }
+    0% { transform: scale(0.7); }
+    50% { transform: scale(1.18); }
     100% { transform: scale(1); }
 }
 
 @keyframes sunkAnim {
-    0% { transform: scale(0.8) rotate(-5deg); background: #34495e; }
-    30% { transform: scale(1.06) rotate(5deg); background: #2c3e50; }
-    70% { transform: scale(0.95) rotate(-3deg); }
-    100% { transform: scale(1) rotate(0deg); background: #2c3e50; }
+    0% { transform: scale(0.8) rotate(-4deg); }
+    35% { transform: scale(1.15) rotate(4deg); }
+    70% { transform: scale(0.95) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0deg); }
 }
 
 @keyframes rippleEffect {
-    0% {
-        transform: scale(0.9);
-        background: #b8a88a;
-    }
-    50% {
-        transform: scale(1.05);
-        background: #c4b89a;
-    }
-    100% {
-        transform: scale(1);
-        background: #d5d0c4;
-    }
+    0% { transform: scale(0.9); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
 }
 
+/* ---------- Кнопки ---------- */
 #controls {
     display: flex;
-    gap: 5px;
+    gap: 10px;
     justify-content: center;
-    margin-top: 2px;
-    flex-shrink: 0;
-    padding-bottom: 2px;
+    margin-top: 20px;
 }
 
 button {
-    padding: 3px 10px;
-    border: 1.5px solid #8a7a5a;
-    border-radius: 3px;
-    font-size: 9px;
+    flex: 1;
+    max-width: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 13px 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.5px;
-    background: #f5f0e8;
-    color: #2c3e50;
-    box-shadow: 0 1.5px 0 #8a7a5a;
-    line-height: 1.2;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 button:active {
-    transform: translateY(1.5px);
-    box-shadow: 0 0px 0 #8a7a5a;
+    transform: scale(0.96);
 }
 
-button:hover {
-    transform: translateY(-0.5px);
-    box-shadow: 0 2px 0 #8a7a5a;
-    background: #fff8ee;
+.btn-icon {
+    font-size: 15px;
 }
 
 .btn-primary {
-    background: #34495e;
-    border-color: #2c3e50;
-    color: white;
-    box-shadow: 0 1.5px 0 #2c3e50;
+    background: var(--tg-button);
+    color: var(--tg-button-text);
 }
 
-.btn-primary:hover {
-    background: #3d566e;
-    box-shadow: 0 2px 0 #2c3e50;
-}
+.btn-primary:hover { opacity: 0.92; }
 
 .btn-secondary {
-    background: #e74c3c;
-    border-color: #c0392b;
-    color: white;
-    box-shadow: 0 1.5px 0 #c0392b;
+    background: rgba(138, 122, 90, 0.16);
+    color: var(--ink);
 }
 
-.btn-secondary:hover {
-    background: #ef5343;
-    box-shadow: 0 2px 0 #c0392b;
+.btn-secondary:hover { opacity: 0.85; }
+
+/* фокус для клавиатурной навигации / доступности */
+button:focus-visible,
+.cell.data:focus-visible {
+    outline: 2px solid var(--tg-link);
+    outline-offset: 2px;
+}
+
+/* ---------- Адаптивность ---------- */
+@media (min-width: 640px) {
+    #game-container {
+        flex-direction: row;
+        justify-content: center;
+        gap: 28px;
+    }
+
+    .board-block {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    #header h1 {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 360px) {
+    .grid {
+        grid-template-columns: 15px repeat(10, 1fr);
+    }
+
+    .cell.data {
+        min-height: 22px;
+        font-size: 12px;
+    }
+
+    .cell.label {
+        font-size: 9px;
+    }
+
+    #app {
+        padding: 14px 10px 16px;
+    }
+}
+
+@media (max-height: 700px) and (max-width: 639px) {
+    .cell.data {
+        min-height: 22px;
+    }
+}
+
+/* уважение к reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
 }
