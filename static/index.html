@@ -11,43 +11,30 @@
     <div id="app">
         <!-- Шапка -->
         <div id="header">
-            <h1>Морской бой</h1>
+            <h1>⚓️ Морской бой</h1>
             <div id="status">🎯 Ваш ход</div>
         </div>
 
         <!-- Игровые поля -->
         <div id="game-container">
-            <div id="player-board">
-                <h3>Ваше поле</h3>
+            <div id="player-board" class="board-wrapper">
+                <h3>🚢 Ваше поле</h3>
                 <div id="player-grid" class="grid-container"></div>
             </div>
 
-            <div id="computer-board">
-                <h3>Поле противника</h3>
+            <div id="computer-board" class="board-wrapper">
+                <h3>🎯 Поле противника</h3>
                 <div id="computer-grid" class="grid-container"></div>
             </div>
         </div>
 
         <!-- Кнопки управления -->
         <div id="controls">
-            <button id="new-game-btn" class="btn-primary">🔄 Новая</button>
+            <button id="new-game-btn" class="btn-primary">🔄 Новая игра</button>
             <button id="close-btn" class="btn-secondary">⬅️ Закрыть</button>
         </div>
     </div>
 
     <script src="script.js"></script>
-    <script>
-        // Принудительно расширяем приложение на весь экран
-        if (window.Telegram && window.Telegram.WebApp) {
-            const tg = window.Telegram.WebApp;
-            tg.expand();
-            tg.enableClosingConfirmation();
-            
-            // Обновляем размер при изменении
-            tg.onEvent('viewportChanged', function() {
-                tg.expand();
-            });
-        }
-    </script>
 </body>
 </html>

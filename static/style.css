@@ -12,7 +12,6 @@ html, body {
 body {
     font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
     background: #d4c9a8;
-    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -29,10 +28,10 @@ body {
     max-width: 500px;
     width: 100%;
     height: 100vh;
-    max-height: 700px;
+    max-height: 680px;
     background: #f5f0e8;
     border-radius: 6px;
-    padding: 8px 10px;
+    padding: 6px 8px 6px 8px;
     box-shadow: 
         0 4px 20px rgba(0, 0, 0, 0.3),
         inset 0 0 0 2px #e8e0d0,
@@ -44,7 +43,6 @@ body {
     overflow: hidden;
 }
 
-/* Эффект тетрадного листа */
 #app::before {
     content: '';
     position: absolute;
@@ -66,10 +64,9 @@ body {
     z-index: 1;
 }
 
-/* Красная линия как в тетради */
 #header {
     text-align: center;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     position: relative;
     padding-bottom: 4px;
     flex-shrink: 0;
@@ -87,7 +84,7 @@ body {
 }
 
 #header h1 {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: #2c3e50;
     font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
@@ -98,22 +95,10 @@ body {
     line-height: 1.2;
 }
 
-#header h1::before {
-    content: '✏️';
-    margin-right: 4px;
-    font-size: 14px;
-}
-
-#header h1::after {
-    content: '📓';
-    margin-left: 4px;
-    font-size: 14px;
-}
-
 #status {
     font-size: 12px;
     font-weight: 600;
-    padding: 3px 12px;
+    padding: 2px 12px;
     border-radius: 3px;
     display: inline-block;
     background: rgba(255, 255, 255, 0.7);
@@ -123,7 +108,7 @@ body {
     min-width: 100px;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-top: 2px;
-    line-height: 1.2;
+    line-height: 1.3;
 }
 
 #status.player-turn {
@@ -165,7 +150,7 @@ body {
 #game-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
     flex: 1;
     min-height: 0;
@@ -173,16 +158,16 @@ body {
     margin: 2px 0;
 }
 
-#player-board, #computer-board {
+.board-wrapper {
     flex: 1;
-    min-width: 160px;
+    min-width: 140px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-#player-board h3, #computer-board h3 {
+.board-wrapper h3 {
     margin-bottom: 2px;
     font-size: 10px;
     color: #2c3e50;
@@ -195,65 +180,34 @@ body {
     padding: 1px 8px;
     border-radius: 3px;
     border: 1px dashed #b8a88a;
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
-#player-board h3::before {
-    content: '🚢 ';
-    font-size: 10px;
-}
-
-#computer-board h3::before {
-    content: '🎯 ';
-    font-size: 10px;
-}
-
-/* КОНТЕЙНЕР С НУМЕРАЦИЕЙ */
-.board-wrapper {
+/* ============ ОСНОВНОЙ КОНТЕЙНЕР ПОЛЯ ============ */
+.grid-container {
     display: inline-block;
-    padding: 2px;
     background: #f5f0e8;
+    padding: 2px;
     border-radius: 3px;
     width: 100%;
-    max-width: 280px;
+    max-width: 260px;
 }
 
-/* Цифры сверху (1-10) */
-.board-top-labels {
-    display: grid;
-    grid-template-columns: 14px repeat(10, 1fr);
-    gap: 1px;
-    margin-bottom: 1px;
-    padding-left: 1px;
-}
-
-.board-top-labels .corner {
-    grid-column: 1;
-}
-
-.board-top-labels .label {
-    font-size: 7px;
-    font-weight: 600;
-    color: #7f8c8d;
-    text-align: center;
-    font-family: 'Courier New', monospace;
-    padding: 0;
-    line-height: 1;
-}
-
-/* Буквы слева (A-J) */
-.board-with-labels {
+/* ============ СЕТКА С НУМЕРАЦИЕЙ ============ */
+.board-grid-wrapper {
     display: grid;
     grid-template-columns: 14px 1fr;
     gap: 1px;
-    align-items: start;
+    background: #f5f0e8;
+    padding: 1px;
+    border-radius: 2px;
 }
 
+/* Буквы слева (A-J) */
 .board-left-labels {
     display: grid;
     grid-template-rows: repeat(10, 1fr);
     gap: 1px;
-    padding-top: 0;
 }
 
 .board-left-labels .label {
@@ -269,9 +223,28 @@ body {
     line-height: 1;
 }
 
-/* Стиль клетчатого поля (максимально компактный) */
+/* Цифры сверху (1-10) в отдельном блоке */
+.board-top-labels {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 1px;
+    padding: 0 0 1px 15px;
+    margin-bottom: 1px;
+}
+
+.board-top-labels .label {
+    font-size: 7px;
+    font-weight: 600;
+    color: #7f8c8d;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    line-height: 1;
+    padding: 0;
+}
+
+/* ============ САМО ПОЛЕ ============ */
 .grid {
-    display: inline-grid;
+    display: grid;
     grid-template-columns: repeat(10, 1fr);
     gap: 1px;
     background: #b8a88a;
@@ -279,7 +252,6 @@ body {
     border-radius: 2px;
     border: 2px solid #8a7a5a;
     width: 100%;
-    max-width: 280px;
     box-shadow: 
         inset 0 0 8px rgba(0, 0, 0, 0.1),
         0 2px 10px rgba(0, 0, 0, 0.15);
@@ -364,7 +336,7 @@ body {
     color: #8a7a5a;
 }
 
-/* Потопленный корабль с черепом */
+/* Потопленный корабль */
 .cell.sunk {
     background: #2c3e50 !important;
     animation: sunkAnim 0.4s ease;
@@ -472,7 +444,7 @@ button:hover {
     box-shadow: 0 3px 0 #c0392b;
 }
 
-/* Адаптивность для маленьких телефонов */
+/* ============ АДАПТИВНОСТЬ ============ */
 @media (max-width: 500px) {
     #app {
         max-height: 600px;
@@ -480,11 +452,7 @@ button:hover {
     }
     
     #header h1 {
-        font-size: 14px;
-    }
-    
-    #header h1::before, #header h1::after {
-        font-size: 11px;
+        font-size: 15px;
     }
     
     #status {
@@ -493,12 +461,25 @@ button:hover {
         min-width: 80px;
     }
     
-    .board-wrapper {
+    .grid-container {
         max-width: 200px;
     }
     
-    .grid {
-        max-width: 200px;
+    .board-grid-wrapper {
+        grid-template-columns: 12px 1fr;
+    }
+    
+    .board-left-labels .label {
+        font-size: 6px;
+        min-height: 14px;
+    }
+    
+    .board-top-labels .label {
+        font-size: 6px;
+    }
+    
+    .board-top-labels {
+        padding: 0 0 1px 13px;
     }
     
     .cell {
@@ -518,28 +499,7 @@ button:hover {
         font-size: 7px;
     }
     
-    .board-top-labels .label {
-        font-size: 6px;
-    }
-    
-    .board-left-labels .label {
-        font-size: 6px;
-        min-height: 12px;
-    }
-    
-    .board-top-labels {
-        grid-template-columns: 11px repeat(10, 1fr);
-    }
-    
-    .board-with-labels {
-        grid-template-columns: 11px 1fr;
-    }
-    
-    #player-board h3, #computer-board h3 {
-        font-size: 8px;
-    }
-    
-    #player-board h3::before, #computer-board h3::before {
+    .board-wrapper h3 {
         font-size: 8px;
     }
     
@@ -555,33 +515,48 @@ button:hover {
 
 @media (max-width: 400px) {
     #app {
-        max-height: 520px;
+        max-height: 540px;
         padding: 3px 4px;
-        border-radius: 4px;
     }
     
     #header h1 {
-        font-size: 12px;
-    }
-    
-    #header h1::before, #header h1::after {
-        font-size: 10px;
+        font-size: 13px;
     }
     
     #status {
         font-size: 9px;
-        padding: 2px 6px;
+        padding: 1px 6px;
         min-width: 70px;
     }
     
-    .board-wrapper {
-        max-width: 170px;
+    .grid-container {
+        max-width: 160px;
+        padding: 1px;
+    }
+    
+    .board-grid-wrapper {
+        grid-template-columns: 10px 1fr;
+        gap: 0.5px;
+    }
+    
+    .board-left-labels .label {
+        font-size: 5px;
+        min-height: 11px;
+    }
+    
+    .board-top-labels .label {
+        font-size: 5px;
+    }
+    
+    .board-top-labels {
+        padding: 0 0 1px 11px;
+        gap: 0.5px;
     }
     
     .grid {
-        max-width: 170px;
+        gap: 0.5px;
         padding: 1px;
-        gap: 1px;
+        border-width: 1.5px;
     }
     
     .cell {
@@ -601,39 +576,16 @@ button:hover {
         font-size: 6px;
     }
     
-    .board-top-labels .label {
-        font-size: 5px;
-    }
-    
-    .board-left-labels .label {
-        font-size: 5px;
-        min-height: 10px;
-    }
-    
-    .board-top-labels {
-        grid-template-columns: 10px repeat(10, 1fr);
-        gap: 0.5px;
-    }
-    
-    .board-with-labels {
-        grid-template-columns: 10px 1fr;
-        gap: 0.5px;
-    }
-    
-    #player-board h3, #computer-board h3 {
+    .board-wrapper h3 {
         font-size: 7px;
         padding: 0 4px;
-    }
-    
-    #player-board h3::before, #computer-board h3::before {
-        font-size: 7px;
     }
     
     button {
         padding: 3px 8px;
         font-size: 8px;
-        border-width: 1px;
-        box-shadow: 0 1px 0 #8a7a5a;
+        border-width: 1.5px;
+        box-shadow: 0 1.5px 0 #8a7a5a;
     }
     
     #game-container {
@@ -644,23 +596,4 @@ button:hover {
         gap: 4px;
         margin-top: 2px;
     }
-}
-
-/* Эффект "рваного" края */
-#app::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        repeating-linear-gradient(90deg, 
-            transparent 0px, 
-            transparent 10px,
-            rgba(138, 122, 90, 0.03) 10px,
-            rgba(138, 122, 90, 0.03) 11px
-        );
-    pointer-events: none;
-    border-radius: 6px;
 }

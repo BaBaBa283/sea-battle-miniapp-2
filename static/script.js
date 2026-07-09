@@ -189,30 +189,25 @@ function shoot(row, col, board, ships) {
 
 // ============ ОТРИСОВКА ПОЛЯ ============
 
-function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false) {
-    boardElement.innerHTML = '';
+function createGrid(container, board, ships, isPlayerBoard, canClick = false) {
+    container.innerHTML = '';
     
-    const wrapper = document.createElement('div');
-    wrapper.className = 'board-wrapper';
-    
-    // Верхние цифры
+    // --- Цифры сверху ---
     const topLabels = document.createElement('div');
     topLabels.className = 'board-top-labels';
-    const corner = document.createElement('div');
-    corner.className = 'corner';
-    topLabels.appendChild(corner);
     for (let i = 1; i <= BOARD_SIZE; i++) {
         const label = document.createElement('div');
         label.className = 'label';
         label.textContent = i;
         topLabels.appendChild(label);
     }
-    wrapper.appendChild(topLabels);
+    container.appendChild(topLabels);
     
-    // Буквы слева + сетка
-    const boardWithLabels = document.createElement('div');
-    boardWithLabels.className = 'board-with-labels';
+    // --- Контейнер с буквами и сеткой ---
+    const gridWrapper = document.createElement('div');
+    gridWrapper.className = 'board-grid-wrapper';
     
+    // Буквы слева
     const leftLabels = document.createElement('div');
     leftLabels.className = 'board-left-labels';
     for (let i = 0; i < BOARD_SIZE; i++) {
@@ -221,11 +216,11 @@ function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false)
         label.textContent = LETTERS[i];
         leftLabels.appendChild(label);
     }
-    boardWithLabels.appendChild(leftLabels);
+    gridWrapper.appendChild(leftLabels);
     
+    // Сама сетка
     const grid = document.createElement('div');
     grid.className = 'grid';
-    grid.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
     
     const sunkShips = ships.filter(ship => ship.hits.length === ship.size);
     
@@ -277,9 +272,8 @@ function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false)
         }
     }
     
-    boardWithLabels.appendChild(grid);
-    wrapper.appendChild(boardWithLabels);
-    boardElement.appendChild(wrapper);
+    gridWrapper.appendChild(grid);
+    container.appendChild(gridWrapper);
 }
 
 // ============ ОБРАБОТКА КЛИКА ============
@@ -313,7 +307,7 @@ function onCellClick(row, col) {
     game.currentTurn = 'computer';
     updateBoards();
     
-    setTimeout(() => computerTurn(), 700);
+    setTimeout(() => computerTurn(), 600);
 }
 
 // ============ ХОД КОМПЬЮТЕРА ============
@@ -357,14 +351,14 @@ function computerTurn() {
         } else {
             updateStatus('computer', `💥 Попал! (${LETTERS[row]}${col+1})`);
         }
-        setTimeout(() => computerTurn(), 500);
+        setTimeout(() => computerTurn(), 400);
     } else {
         updateStatus('player', `🌊 Промах! (${LETTERS[row]}${col+1})`);
         game.currentTurn = 'player';
         setTimeout(() => {
             updateStatus('player', '🎯 Ваш ход!');
             updateBoards();
-        }, 300);
+        }, 250);
     }
 }
 
