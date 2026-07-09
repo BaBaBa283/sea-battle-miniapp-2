@@ -5,8 +5,8 @@
 }
 
 html, body {
-    width: 360px;
-    height: 640px;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -25,8 +25,10 @@ body {
 }
 
 #app {
-    width: 360px;
-    height: 640px;
+    width: 100%;
+    height: 100%;
+    max-width: 420px;
+    max-height: 780px;
     background: #f5f0e8;
     border-radius: 6px;
     padding: 4px 6px;
@@ -66,7 +68,7 @@ body {
     text-align: center;
     margin-bottom: 2px;
     position: relative;
-    padding-bottom: 3px;
+    padding-bottom: 2px;
     flex-shrink: 0;
 }
 
@@ -82,7 +84,7 @@ body {
 }
 
 #header h1 {
-    font-size: 14px;
+    font-size: clamp(14px, 2.5vh, 20px);
     font-weight: 700;
     color: #2c3e50;
     font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
@@ -95,30 +97,34 @@ body {
 
 #header h1::before {
     content: '✏️';
-    margin-right: 3px;
-    font-size: 11px;
+    margin-right: 4px;
+    font-size: clamp(11px, 2vh, 16px);
 }
 
 #header h1::after {
     content: '📓';
-    margin-left: 3px;
-    font-size: 11px;
+    margin-left: 4px;
+    font-size: clamp(11px, 2vh, 16px);
 }
 
 #status {
-    font-size: 10px;
+    font-size: clamp(10px, 1.8vh, 14px);
     font-weight: 600;
-    padding: 1px 8px;
+    padding: 1px 10px;
     border-radius: 3px;
     display: inline-block;
     background: rgba(255, 255, 255, 0.7);
     color: #2c3e50;
     border: 1.5px solid #b8a88a;
     font-family: 'Courier New', monospace;
-    min-width: 70px;
+    min-width: 60px;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-top: 1px;
     line-height: 1.3;
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #status.player-turn {
@@ -160,21 +166,28 @@ body {
 #game-container {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     justify-content: center;
-    flex: 1;
+    flex: 1 1 auto;
     min-height: 0;
-    margin: 1px 0;
+    padding: 1px 0;
+    overflow: hidden;
 }
 
 #player-board, #computer-board {
     text-align: center;
-    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    flex: 0 0 50%;
+    max-height: 50%;
 }
 
 #player-board h3, #computer-board h3 {
-    margin-bottom: 1px;
-    font-size: 8px;
+    margin-bottom: 2px;
+    font-size: clamp(8px, 1.4vh, 11px);
     color: #2c3e50;
     font-weight: 600;
     font-family: 'Courier New', monospace;
@@ -182,98 +195,119 @@ body {
     text-transform: uppercase;
     background: rgba(255, 255, 255, 0.5);
     display: inline-block;
-    padding: 0 5px;
+    padding: 0 6px;
     border-radius: 2px;
     border: 1px dashed #b8a88a;
-    line-height: 1.2;
+    line-height: 1.3;
+    flex-shrink: 0;
 }
 
 #player-board h3::before {
     content: '🚢 ';
-    font-size: 7px;
+    font-size: clamp(7px, 1.2vh, 9px);
 }
 
 #computer-board h3::before {
     content: '🎯 ';
-    font-size: 7px;
+    font-size: clamp(7px, 1.2vh, 9px);
 }
 
 /* ============ КОНТЕЙНЕР ПОЛЯ ============ */
 .grid-container {
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
     background: #f5f0e8;
     padding: 1px;
     border-radius: 2px;
     width: 100%;
-    max-width: 280px;
+    height: 100%;
+    max-height: 100%;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    min-height: 0;
+    max-width: 100%;
 }
 
 /* ============ СЕТКА С НУМЕРАЦИЕЙ ============ */
 .board-grid-wrapper {
     display: grid;
-    grid-template-columns: 14px 1fr;
-    gap: 0.5px;
+    grid-template-columns: auto 1fr;
+    gap: 1px;
     background: #f5f0e8;
     padding: 0.5px;
     border-radius: 2px;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 0;
 }
 
 /* Буквы слева (A-J) */
 .board-left-labels {
     display: grid;
     grid-template-rows: repeat(10, 1fr);
-    gap: 0.5px;
+    gap: 1px;
+    width: clamp(12px, 2.2vw, 18px);
+    flex-shrink: 0;
+    align-items: stretch;
 }
 
 .board-left-labels .label {
-    font-size: 7px;
-    font-weight: 600;
-    color: #7f8c8d;
+    font-size: clamp(7px, 1.2vh, 10px);
+    font-weight: 700;
+    color: #2c3e50;
     text-align: center;
     font-family: 'Courier New', monospace;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 15px;
     line-height: 1;
+    background: #f5f0e8;
 }
 
 /* Цифры сверху (1-10) */
 .board-top-labels {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
-    gap: 0.5px;
-    padding: 0 0 0.5px 15px;
-    margin-bottom: 0.5px;
+    gap: 1px;
+    padding-left: calc(clamp(12px, 2.2vw, 18px) + 1px);
+    margin-bottom: 1px;
+    flex-shrink: 0;
 }
 
 .board-top-labels .label {
-    font-size: 7px;
-    font-weight: 600;
-    color: #7f8c8d;
+    font-size: clamp(7px, 1.2vh, 10px);
+    font-weight: 700;
+    color: #2c3e50;
     text-align: center;
     font-family: 'Courier New', monospace;
     line-height: 1;
-    padding: 0;
+    padding: 1px 0;
+    background: #f5f0e8;
 }
 
 /* ============ САМО ПОЛЕ ============ */
 .grid {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
-    gap: 0.5px;
+    grid-template-rows: repeat(10, 1fr);
+    gap: 1px;
     background: #b8a88a;
-    padding: 0.5px;
+    padding: 1px;
     border-radius: 2px;
     border: 1.5px solid #8a7a5a;
     width: 100%;
+    height: 100%;
+    max-height: 100%;
     box-shadow: 
         inset 0 0 6px rgba(0, 0, 0, 0.1),
         0 2px 8px rgba(0, 0, 0, 0.12);
+    aspect-ratio: 1 / 1;
 }
 
 .cell {
-    aspect-ratio: 1;
     background: #f5f0e8;
     border-radius: 1px;
     cursor: pointer;
@@ -281,13 +315,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: clamp(9px, 1.6vh, 14px);
     font-weight: bold;
     color: #2c3e50;
     user-select: none;
-    min-height: 14px;
     position: relative;
     font-family: 'Courier New', monospace;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
 }
 
 .cell:hover:not(.hit):not(.miss):not(.sunk):not(.miss-around-sunk):not(.disabled) {
@@ -306,7 +343,7 @@ body {
 
 .cell.ship::after {
     content: '⛵';
-    font-size: 7px;
+    font-size: clamp(6px, 1vh, 9px);
     opacity: 0.4;
 }
 
@@ -320,7 +357,7 @@ body {
 
 .cell.hit::after {
     content: '✕';
-    font-size: 11px;
+    font-size: clamp(10px, 1.8vh, 16px);
     color: white;
     font-weight: 900;
     text-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
@@ -334,7 +371,7 @@ body {
 
 .cell.miss::after {
     content: '•';
-    font-size: 13px;
+    font-size: clamp(12px, 2vh, 18px);
     color: #8a7a5a;
 }
 
@@ -347,7 +384,7 @@ body {
 
 .cell.miss-around-sunk::after {
     content: '•';
-    font-size: 13px;
+    font-size: clamp(12px, 2vh, 18px);
     color: #8a7a5a;
 }
 
@@ -361,7 +398,7 @@ body {
 
 .cell.sunk::after {
     content: '☠';
-    font-size: 13px;
+    font-size: clamp(10px, 1.8vh, 16px);
     color: #e74c3c;
     text-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
 }
@@ -409,10 +446,10 @@ body {
 }
 
 button {
-    padding: 4px 12px;
+    padding: 5px 14px;
     border: 1.5px solid #8a7a5a;
     border-radius: 3px;
-    font-size: 10px;
+    font-size: clamp(10px, 1.6vh, 13px);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -420,18 +457,20 @@ button {
     letter-spacing: 0.5px;
     background: #f5f0e8;
     color: #2c3e50;
-    box-shadow: 0 1.5px 0 #8a7a5a;
+    box-shadow: 0 2px 0 #8a7a5a;
     line-height: 1.2;
+    flex: 1;
+    max-width: 140px;
 }
 
 button:active {
-    transform: translateY(1.5px);
+    transform: translateY(2px);
     box-shadow: 0 0px 0 #8a7a5a;
 }
 
 button:hover {
-    transform: translateY(-0.5px);
-    box-shadow: 0 2px 0 #8a7a5a;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 0 #8a7a5a;
     background: #fff8ee;
 }
 
@@ -439,22 +478,22 @@ button:hover {
     background: #34495e;
     border-color: #2c3e50;
     color: white;
-    box-shadow: 0 1.5px 0 #2c3e50;
+    box-shadow: 0 2px 0 #2c3e50;
 }
 
 .btn-primary:hover {
     background: #3d566e;
-    box-shadow: 0 2px 0 #2c3e50;
+    box-shadow: 0 3px 0 #2c3e50;
 }
 
 .btn-secondary {
     background: #e74c3c;
     border-color: #c0392b;
     color: white;
-    box-shadow: 0 1.5px 0 #c0392b;
+    box-shadow: 0 2px 0 #c0392b;
 }
 
 .btn-secondary:hover {
     background: #ef5343;
-    box-shadow: 0 2px 0 #c0392b;
+    box-shadow: 0 3px 0 #c0392b;
 }
