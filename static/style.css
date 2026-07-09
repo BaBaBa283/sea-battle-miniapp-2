@@ -5,75 +5,144 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 100%);
-    color: #e0e0e0;
+    font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+    background: #d4c9a8;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
     margin: 0;
+    background-image: 
+        linear-gradient(rgba(200, 180, 140, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200, 180, 140, 0.3) 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
 #app {
     max-width: 950px;
     width: 100%;
-    background: rgba(22, 33, 62, 0.95);
-    border-radius: 24px;
+    background: #f5f0e8;
+    border-radius: 8px;
     padding: 24px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.3),
+        inset 0 0 0 2px #e8e0d0,
+        inset 0 0 0 4px #d4c9a8;
+    border: 1px solid #b8a88a;
+    position: relative;
 }
 
+/* Эффект тетрадного листа */
+#app::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(rgba(180, 160, 130, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(180, 160, 130, 0.08) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    border-radius: 8px;
+    z-index: 0;
+}
+
+#app > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Красная линия как в тетради */
 #header {
     text-align: center;
     margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 12px;
+}
+
+#header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #e74c3c;
+    opacity: 0.6;
 }
 
 #header h1 {
     font-size: 32px;
     font-weight: 700;
-    background: linear-gradient(135deg, #00d4ff, #0077ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 8px;
-    text-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+    color: #2c3e50;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.05);
+    letter-spacing: 2px;
+    position: relative;
+    display: inline-block;
+}
+
+#header h1::before {
+    content: '✏️';
+    margin-right: 8px;
+}
+
+#header h1::after {
+    content: '📓';
+    margin-left: 8px;
 }
 
 #status {
     font-size: 18px;
     font-weight: 600;
-    padding: 10px 24px;
-    border-radius: 12px;
+    padding: 8px 24px;
+    border-radius: 4px;
     display: inline-block;
-    background: rgba(15, 52, 96, 0.8);
-    color: #ffd700;
-    border: 1px solid rgba(255, 215, 0, 0.2);
+    background: rgba(255, 255, 255, 0.7);
+    color: #2c3e50;
+    border: 2px solid #b8a88a;
+    font-family: 'Courier New', monospace;
     min-width: 180px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #status.player-turn {
-    color: #00ff88;
-    border-color: rgba(0, 255, 136, 0.3);
+    color: #27ae60;
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.1);
 }
 
 #status.computer-turn {
-    color: #ff6b6b;
-    border-color: rgba(255, 107, 107, 0.3);
+    color: #e74c3c;
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
 }
 
 #status.game-over-win {
-    color: #00ff88;
-    border-color: rgba(0, 255, 136, 0.5);
-    background: rgba(0, 255, 136, 0.1);
+    color: #27ae60;
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.15);
+    animation: winPulse 1s ease-in-out infinite;
 }
 
 #status.game-over-lose {
-    color: #ff4444;
-    border-color: rgba(255, 68, 68, 0.5);
-    background: rgba(255, 68, 68, 0.1);
+    color: #e74c3c;
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.15);
+    animation: losePulse 1s ease-in-out infinite;
+}
+
+@keyframes winPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+@keyframes losePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.98); }
 }
 
 #game-container {
@@ -91,28 +160,48 @@ body {
 }
 
 #player-board h3, #computer-board h3 {
-    margin-bottom: 12px;
-    font-size: 18px;
-    color: #a8d8ea;
-    font-weight: 500;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #2c3e50;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.5);
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 4px;
+    border: 1px dashed #b8a88a;
 }
 
+#player-board h3::before {
+    content: '🚢 ';
+}
+
+#computer-board h3::before {
+    content: '🎯 ';
+}
+
+/* Стиль клетчатого поля */
 .grid {
     display: inline-grid;
     grid-template-columns: repeat(10, 1fr);
-    gap: 3px;
-    background: rgba(15, 52, 96, 0.5);
-    padding: 6px;
-    border-radius: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.05);
+    gap: 1px;
+    background: #b8a88a;
+    padding: 2px;
+    border-radius: 4px;
+    border: 3px solid #8a7a5a;
     max-width: 400px;
     width: 100%;
+    box-shadow: 
+        inset 0 0 10px rgba(0, 0, 0, 0.1),
+        0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .cell {
     aspect-ratio: 1;
-    background: rgba(26, 58, 106, 0.6);
-    border-radius: 4px;
+    background: #f5f0e8;
+    border-radius: 1px;
     cursor: pointer;
     transition: all 0.15s ease;
     display: flex;
@@ -120,75 +209,120 @@ body {
     justify-content: center;
     font-size: 16px;
     font-weight: bold;
-    color: #fff;
+    color: #2c3e50;
     user-select: none;
     min-height: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    font-family: 'Courier New', monospace;
 }
 
-.cell:hover:not(.hit):not(.miss):not(.disabled) {
-    background: rgba(42, 90, 138, 0.8);
-    transform: scale(1.05);
-    border-color: rgba(0, 212, 255, 0.3);
+.cell:hover:not(.hit):not(.miss):not(.sunk):not(.miss-around-sunk):not(.disabled) {
+    background: #e8e0d0;
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 2;
 }
 
+/* Корабль (виден только на своём поле) */
 .cell.ship {
-    background: rgba(74, 122, 181, 0.7);
-    border-color: rgba(74, 122, 181, 0.3);
+    background: #34495e;
+    border: 1px solid #2c3e50;
+    box-shadow: inset 0 0 0 1px #4a6a8a;
 }
 
+.cell.ship::after {
+    content: '⛵';
+    font-size: 12px;
+    opacity: 0.4;
+}
+
+/* Попадание - закрашенная клетка с крестиком */
 .cell.hit {
-    background: rgba(255, 68, 68, 0.9) !important;
+    background: #c0392b !important;
     animation: hitAnim 0.3s ease;
-    border-color: #ff4444;
+    border: 1px solid #922b21;
+    box-shadow: inset 0 0 20px rgba(192, 57, 43, 0.3);
 }
 
+.cell.hit::after {
+    content: '✕';
+    font-size: 20px;
+    color: white;
+    font-weight: 900;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Промах - закрашенная клетка с точкой */
 .cell.miss {
-    background: rgba(42, 74, 106, 0.5) !important;
-    border-color: rgba(255, 255, 255, 0.05);
+    background: #d5d0c4 !important;
+    border: 1px solid #b8a88a;
 }
 
+.cell.miss::after {
+    content: '•';
+    font-size: 24px;
+    color: #8a7a5a;
+}
+
+/* Промах вокруг потопленного корабля - такой же как обычный промах */
+.cell.miss-around-sunk {
+    background: #d5d0c4 !important;
+    border: 1px solid #b8a88a;
+    animation: rippleEffect 0.6s ease;
+}
+
+.cell.miss-around-sunk::after {
+    content: '•';
+    font-size: 24px;
+    color: #8a7a5a;
+}
+
+/* ★★★ ПОТОПЛЕННЫЙ КОРАБЛЬ - С ЧЕРЕПОМ ☠ ★★★ */
 .cell.sunk {
-    background: rgba(255, 0, 0, 0.8) !important;
+    background: #2c3e50 !important;
     animation: sunkAnim 0.5s ease;
-    border-color: #ff0000;
+    border: 1px solid #1a252f;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+.cell.sunk::after {
+    content: '☠';
+    font-size: 22px;
+    color: #e74c3c;
+    text-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
 }
 
 .cell.disabled {
     cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.cell.hit::after {
-    content: '💥';
-    font-size: 18px;
-}
-
-.cell.miss::after {
-    content: '🌊';
-    font-size: 18px;
-}
-
-.cell.sunk::after {
-    content: '💀';
-    font-size: 18px;
-}
-
-.cell.ship.hit::after {
-    content: '💥';
+    opacity: 0.85;
 }
 
 @keyframes hitAnim {
-    0% { transform: scale(0.8); background: #ff0000; }
-    50% { transform: scale(1.2); }
+    0% { transform: scale(0.7); background: #e74c3c; }
+    50% { transform: scale(1.15); }
     100% { transform: scale(1); }
 }
 
 @keyframes sunkAnim {
-    0% { transform: rotate(0deg) scale(0.8); }
-    25% { transform: rotate(10deg) scale(1.1); }
-    75% { transform: rotate(-10deg) scale(1.1); }
-    100% { transform: rotate(0deg) scale(1); }
+    0% { transform: scale(0.8) rotate(-5deg); background: #34495e; }
+    30% { transform: scale(1.15) rotate(5deg); background: #2c3e50; }
+    70% { transform: scale(0.95) rotate(-3deg); }
+    100% { transform: scale(1) rotate(0deg); background: #2c3e50; }
+}
+
+@keyframes rippleEffect {
+    0% {
+        transform: scale(0.9);
+        background: #b8a88a;
+    }
+    50% {
+        transform: scale(1.1);
+        background: #c4b89a;
+    }
+    100% {
+        transform: scale(1);
+        background: #d5d0c4;
+    }
 }
 
 #controls {
@@ -201,38 +335,52 @@ body {
 
 button {
     padding: 12px 28px;
-    border: none;
-    border-radius: 12px;
+    border: 2px solid #8a7a5a;
+    border-radius: 4px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: white;
-    font-family: inherit;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    background: #f5f0e8;
+    color: #2c3e50;
+    box-shadow: 0 2px 0 #8a7a5a;
 }
 
 button:active {
-    transform: scale(0.95);
+    transform: translateY(2px);
+    box-shadow: 0 0px 0 #8a7a5a;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 #8a7a5a;
+    background: #fff8ee;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #00d4ff, #0077ff);
-    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    background: #34495e;
+    border-color: #2c3e50;
+    color: white;
+    box-shadow: 0 2px 0 #2c3e50;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(0, 212, 255, 0.4);
+    background: #3d566e;
+    box-shadow: 0 4px 0 #2c3e50;
 }
 
 .btn-secondary {
-    background: rgba(233, 69, 96, 0.8);
-    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.2);
+    background: #e74c3c;
+    border-color: #c0392b;
+    color: white;
+    box-shadow: 0 2px 0 #c0392b;
 }
 
 .btn-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(233, 69, 96, 0.3);
+    background: #ef5343;
+    box-shadow: 0 4px 0 #c0392b;
 }
 
 /* Адаптивность */
@@ -255,13 +403,17 @@ button:active {
         font-size: 14px;
     }
     
+    .cell.hit::after, .cell.miss::after, .cell.sunk::after, .cell.miss-around-sunk::after {
+        font-size: 16px;
+    }
+    
     #header h1 {
         font-size: 24px;
     }
     
     #status {
         font-size: 15px;
-        padding: 8px 16px;
+        padding: 6px 16px;
         min-width: 140px;
     }
     
@@ -277,7 +429,7 @@ button:active {
         font-size: 12px;
     }
     
-    .cell.hit::after, .cell.miss::after, .cell.sunk::after {
+    .cell.hit::after, .cell.miss::after, .cell.sunk::after, .cell.miss-around-sunk::after {
         font-size: 14px;
     }
     
@@ -286,18 +438,36 @@ button:active {
     }
 }
 
-/* Скролл для маленьких экранов */
 @media (max-height: 700px) {
     #game-container {
         gap: 12px;
     }
     
     .grid {
-        padding: 4px;
-        gap: 2px;
+        padding: 2px;
+        gap: 1px;
     }
     
     .cell {
-        min-height: 20px;
+        min-height: 18px;
     }
+}
+
+/* Эффект "рваного" края как у тетради */
+#app::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(90deg, 
+            transparent 0px, 
+            transparent 10px,
+            rgba(138, 122, 90, 0.03) 10px,
+            rgba(138, 122, 90, 0.03) 11px
+        );
+    pointer-events: none;
+    border-radius: 8px;
 }

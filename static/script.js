@@ -111,53 +111,54 @@ function checkWin(board, ships) {
     return true;
 }
 
-// ============ ОТРИСОВКА ПОЛЯ ============
+// ============ ЗАКРАШИВАНИЕ КЛЕТОК ВОКРУГ ПОТОПЛЕННОГО КОРАБЛЯ ============
 
-function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false) {
-    boardElement.innerHTML = '';
-    boardElement.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
+function markSurroundingCells(row, col, ship, board) {
+    const coords = getShipCoords(ship);
+    const markedCells = new Set();
     
-    for (let i = 0; i < BOARD_SIZE; i++) {
-        for (let j = 0; j < BOARD_SIZE; j++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.dataset.row = i;
-            cell.dataset.col = j;
-            
-            const value = board[i][j];
-            
-            // Определяем состояние клетки
-            if (value === 1 || value === 'ship') {
-                if (isPlayerBoard) {
-                    cell.classList.add('ship');
-                } else {
-                    // Скрываем корабли противника
+    // Проходим по всем клеткам вокруг корабля
+    for (const [r, c] of coords) {
+        // Проверяем все 8 соседних клеток
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                const nr = r + dr;
+                const nc = c + dc;
+                
+                // Проверяем, что клетка в пределах поля
+                if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+                    const key = `${nr},${nc}`;
+                    if (!markedCells.has(key)) {
+                        const value = board[nr][nc];
+                        // Если клетка пустая или корабль (но не потоплена) - помечаем как промах
+                        if (value === 0 || value === 1 || value === 'ship') {
+                            board[nr][nc] = 'miss-around-sunk';
+                            markedCells.add(key);
+                        }
+                    }
                 }
             }
-            
-            if (value === 'hit') {
-                cell.classList.add('hit');
-            } else if (value === 'miss') {
-                cell.classList.add('miss');
-            } else if (value === 'sunk') {
-                cell.classList.add('sunk');
-            }
-            
-            // Если это поле противника и можно кликать
-            if (!isPlayerBoard && canClick && !game.gameOver && game.currentTurn === 'player') {
-                if (value !== 'hit' && value !== 'miss' && value !== 'sunk') {
-                    cell.style.cursor = 'pointer';
-                    cell.addEventListener('click', () => onCellClick(i, j));
-                } else {
-                    cell.classList.add('disabled');
-                }
-            } else {
-                cell.classList.add('disabled');
-            }
-            
-            boardElement.appendChild(cell);
         }
     }
+}
+
+// Проверка, находится ли клетка вокруг потопленного корабля
+function isCellAroundSunk(row, col, sunkShips) {
+    for (const ship of sunkShips) {
+        const coords = getShipCoords(ship);
+        for (const [r, c] of coords) {
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    const nr = r + dr;
+                    const nc = c + dc;
+                    if (nr === row && nc === col) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 // ============ ЛОГИКА ВЫСТРЕЛА ============
@@ -179,9 +180,12 @@ function shoot(row, col, board, ships) {
             
             if (ship.hits.length === ship.size) {
                 sunk = true;
+                // Помечаем все палубы как потопленные
                 for (const [r, c] of coords) {
                     board[r][c] = 'sunk';
                 }
+                // Закрашиваем клетки вокруг корабля
+                markSurroundingCells(row, col, ship, board);
             }
             shipIndex = s;
             break;
@@ -196,13 +200,75 @@ function shoot(row, col, board, ships) {
     return { hit, sunk, win, shipIndex };
 }
 
+// ============ ОТРИСОВКА ПОЛЯ ============
+
+function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false) {
+    boardElement.innerHTML = '';
+    boardElement.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
+    
+    // Собираем все потопленные корабли
+    const sunkShips = ships.filter(ship => ship.hits.length === ship.size);
+    
+    for (let i = 0; i < BOARD_SIZE; i++) {
+        for (let j = 0; j < BOARD_SIZE; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.row = i;
+            cell.dataset.col = j;
+            
+            const value = board[i][j];
+            
+            // Определяем состояние клетки
+            if (value === 1 || value === 'ship') {
+                if (isPlayerBoard) {
+                    cell.classList.add('ship');
+                }
+            }
+            
+            if (value === 'hit') {
+                cell.classList.add('hit');
+            } else if (value === 'miss') {
+                cell.classList.add('miss');
+            } else if (value === 'sunk') {
+                cell.classList.add('sunk');
+            } else if (value === 'miss-around-sunk') {
+                cell.classList.add('miss-around-sunk');
+            }
+            
+            // Проверяем, не находится ли клетка вокруг потопленного корабля
+            // (для случая, когда клетка была помечена как miss, но должна быть miss-around-sunk)
+            if (value === 'miss' && !isPlayerBoard) {
+                const isAroundSunk = isCellAroundSunk(i, j, sunkShips);
+                if (isAroundSunk) {
+                    cell.classList.remove('miss');
+                    cell.classList.add('miss-around-sunk');
+                }
+            }
+            
+            // Если это поле противника и можно кликать
+            if (!isPlayerBoard && canClick && !game.gameOver && game.currentTurn === 'player') {
+                if (value !== 'hit' && value !== 'miss' && value !== 'sunk' && value !== 'miss-around-sunk') {
+                    cell.style.cursor = 'pointer';
+                    cell.addEventListener('click', () => onCellClick(i, j));
+                } else {
+                    cell.classList.add('disabled');
+                }
+            } else {
+                cell.classList.add('disabled');
+            }
+            
+            boardElement.appendChild(cell);
+        }
+    }
+}
+
 // ============ ОБРАБОТКА КЛИКА ============
 
 function onCellClick(row, col) {
     if (game.gameOver || game.currentTurn !== 'player') return;
     
     const board = game.computerBoard;
-    if (board[row][col] === 'hit' || board[row][col] === 'miss' || board[row][col] === 'sunk') return;
+    if (board[row][col] === 'hit' || board[row][col] === 'miss' || board[row][col] === 'sunk' || board[row][col] === 'miss-around-sunk') return;
     
     // Выстрел игрока
     const result = shoot(row, col, game.computerBoard, game.computerShips);
@@ -217,7 +283,7 @@ function onCellClick(row, col) {
     
     if (result.hit) {
         if (result.sunk) {
-            updateStatus('player', '💥 Корабль потоплен! Ещё ход!');
+            updateStatus('player', '💥 Корабль потоплен! Вода вокруг закрашена! 🌊');
         } else {
             updateStatus('player', '💥 Попадание! Ещё ход!');
         }
@@ -242,7 +308,7 @@ function computerTurn() {
     for (let i = 0; i < BOARD_SIZE; i++) {
         for (let j = 0; j < BOARD_SIZE; j++) {
             const val = game.playerBoard[i][j];
-            if (val !== 'hit' && val !== 'miss' && val !== 'sunk') {
+            if (val !== 'hit' && val !== 'miss' && val !== 'sunk' && val !== 'miss-around-sunk') {
                 available.push([i, j]);
             }
         }
