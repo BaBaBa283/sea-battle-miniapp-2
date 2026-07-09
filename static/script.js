@@ -8,13 +8,9 @@ const tg = window.Telegram?.WebApp;
 
 function initTelegram() {
     if (!tg) return;
-
     tg.ready();
     tg.expand();
     tg.enableClosingConfirmation();
-
-    // Подгоняем системные цвета шапки/фона под тему приложения,
-    // если этот метод поддерживается версией клиента.
     try {
         if (tg.isVersionAtLeast && tg.isVersionAtLeast('6.1')) {
             tg.setHeaderColor(tg.themeParams.secondary_bg_color ? 'secondary_bg_color' : 'bg_color');
@@ -22,16 +18,12 @@ function initTelegram() {
         if (tg.isVersionAtLeast && tg.isVersionAtLeast('6.1')) {
             tg.setBackgroundColor(tg.themeParams.bg_color || '#efe7d3');
         }
-    } catch (e) { /* старый клиент — просто игнорируем */ }
-
-    // Кнопка "назад" системы Telegram дублирует нашу кнопку закрытия
+    } catch (e) { /* noop */ }
     if (tg.BackButton) {
         tg.BackButton.show();
         tg.BackButton.onClick(closeApp);
     }
-
     tg.onEvent('viewportChanged', () => tg.expand());
-    tg.onEvent('themeChanged', () => { /* CSS-переменные обновятся сами */ });
 }
 
 function haptic(type) {
@@ -54,10 +46,16 @@ let game = {
     computerShips: [],
     currentTurn: 'player',
     gameOver: false,
-    // Память ИИ: клетки текущего подбитого (но не потопленного) корабля
-    // и очередь клеток-кандидатов "по кресту" вокруг них.
     computerHits: [],
     computerTargetQueue: []
+};
+
+// ============ СОСТОЯНИЕ РАССТАНОВКИ ============
+let setup = {
+    board: [],
+    ships: [],
+    currentShipIndex: 0,
+    isHorizontal: true
 };
 
 // ============ ФУНКЦИИ ИГРЫ ============
@@ -101,7 +99,7 @@ function canPlaceShip(board, row, col, size, horizontal) {
     return true;
 }
 
-function placeShip(board, row, col, size, horizontal) {
+function placeShipOnBoard(board, row, col, size, horizontal) {
     for (let i = 0; i < size; i++) {
         const r = horizontal ? row : row + i;
         const c = horizontal ? col + i : col;
@@ -123,7 +121,7 @@ function placeShipsRandom() {
             const horizontal = Math.random() > 0.5;
 
             if (canPlaceShip(board, row, col, size, horizontal)) {
-                placeShip(board, row, col, size, horizontal);
+                placeShipOnBoard(board, row, col, size, horizontal);
                 ships.push({ row, col, size, horizontal, hits: [] });
                 placed = true;
             }
@@ -147,7 +145,7 @@ function checkWin(board, ships) {
     return true;
 }
 
-// ============ ЗАКРАШИВАНИЕ КЛЕТОК ВОКРУГ ПОТОПЛЕННОГО КОРАБЛЯ ============
+// ============ ЗАКРАШИВАНИЕ ВОКРУГ ПОТОПЛЕННОГО ============
 
 function markSurroundingCells(row, col, ship, board) {
     const coords = getShipCoords(ship);
@@ -229,15 +227,18 @@ function shoot(row, col, board, ships) {
     return { hit, sunk, win, shipIndex };
 }
 
-// ============ ОТРИСОВКА ПОЛЯ (11x11: подписи + сетка) ============
+// ============ ОТРИСОВКА ПОЛЯ ДЛЯ РАССТАНОВКИ ============
 
-function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false) {
-    boardElement.innerHTML = '';
-
-    const sunkShips = ships.filter(ship => ship.hits.length === ship.size);
+function createSetupGrid() {
+    const grid = document.getElementById('setup-grid');
+    if (!grid) {
+        console.error('setup-grid not found');
+        return;
+    }
+    grid.innerHTML = '';
     const fragment = document.createDocumentFragment();
 
-    // Строка 0: пустой угол + номера столбцов (1..10)
+    // Угол + номера столбцов
     const corner = document.createElement('div');
     corner.className = 'cell label corner';
     fragment.appendChild(corner);
@@ -249,7 +250,168 @@ function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false)
         fragment.appendChild(colLabel);
     }
 
-    // Строки 1..10: буква строки + игровые клетки
+    // Строки
+    for (let i = 0; i < BOARD_SIZE; i++) {
+        const rowLabel = document.createElement('div');
+        rowLabel.className = 'cell label row-label';
+        rowLabel.textContent = LETTERS[i];
+        fragment.appendChild(rowLabel);
+
+        for (let j = 0; j < BOARD_SIZE; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell data setup-empty';
+            cell.dataset.row = i;
+            cell.dataset.col = j;
+
+            const value = setup.board[i][j];
+            if (value === 1) {
+                cell.classList.remove('setup-empty');
+                cell.classList.add('setup-ship-placed');
+            }
+
+            cell.addEventListener('click', () => onSetupCellClick(i, j));
+            cell.addEventListener('touchstart', () => onSetupCellClick(i, j), { passive: true });
+
+            fragment.appendChild(cell);
+        }
+    }
+
+    grid.appendChild(fragment);
+    updateShipsLeft();
+    updateOrientationDisplay();
+}
+
+function updateShipsLeft() {
+    const placed = setup.ships.length;
+    const total = SHIP_SIZES.length;
+    const left = total - placed;
+    const span = document.getElementById('ships-left');
+    if (span) span.textContent = `Осталось: ${left} кораблей`;
+
+    const btn = document.getElementById('start-game-btn');
+    if (btn) btn.disabled = left > 0;
+
+    const hint = document.getElementById('setup-hint');
+    if (hint) {
+        if (left > 0) {
+            const nextSize = SHIP_SIZES[placed];
+            hint.textContent = `Разместите корабль размером ${nextSize} (нажмите на клетку)`;
+        } else {
+            hint.textContent = '✅ Все корабли расставлены! Начинайте битву!';
+        }
+    }
+}
+
+function updateOrientationDisplay() {
+    const span = document.getElementById('orientation-text');
+    if (span) span.textContent = setup.isHorizontal ? 'Горизонтальная' : 'Вертикальная';
+}
+
+// ============ ЛОГИКА РАССТАНОВКИ ============
+
+function onSetupCellClick(row, col) {
+    const placed = setup.ships.length;
+    if (placed >= SHIP_SIZES.length) return;
+
+    const size = SHIP_SIZES[placed];
+
+    if (!canPlaceShip(setup.board, row, col, size, setup.isHorizontal)) {
+        haptic('miss');
+        const hint = document.getElementById('setup-hint');
+        if (hint) {
+            hint.textContent = '❌ Нельзя разместить здесь! Попробуйте другую клетку.';
+            setTimeout(() => {
+                const left = SHIP_SIZES.length - setup.ships.length;
+                if (left > 0) {
+                    hint.textContent = `Разместите корабль размером ${size} (нажмите на клетку)`;
+                }
+            }, 1000);
+        }
+        return;
+    }
+
+    const ship = { row, col, size, horizontal: setup.isHorizontal, hits: [] };
+    placeShipOnBoard(setup.board, row, col, size, setup.isHorizontal);
+    setup.ships.push(ship);
+
+    createSetupGrid();
+    haptic('tap');
+
+    if (setup.ships.length === SHIP_SIZES.length) {
+        const btn = document.getElementById('start-game-btn');
+        if (btn) btn.disabled = false;
+        const hint = document.getElementById('setup-hint');
+        if (hint) hint.textContent = '✅ Все корабли расставлены! Начинайте битву!';
+    }
+}
+
+// ============ ВРАЩЕНИЕ КОРАБЛЯ ============
+
+function rotateShips() {
+    setup.isHorizontal = !setup.isHorizontal;
+    updateOrientationDisplay();
+    haptic('tap');
+    
+    const hint = document.getElementById('setup-hint');
+    const placed = setup.ships.length;
+    if (placed < SHIP_SIZES.length && hint) {
+        const nextSize = SHIP_SIZES[placed];
+        hint.textContent = `🔄 Ориентация изменена! Разместите корабль размером ${nextSize}`;
+        setTimeout(() => {
+            hint.textContent = `Разместите корабль размером ${nextSize} (нажмите на клетку)`;
+        }, 1500);
+    }
+}
+
+function toggleOrientation() {
+    setup.isHorizontal = !setup.isHorizontal;
+    updateOrientationDisplay();
+    haptic('tap');
+}
+
+function autoPlaceShips() {
+    const result = placeShipsRandom();
+    setup.board = result.board;
+    setup.ships = result.ships;
+    createSetupGrid();
+    const btn = document.getElementById('start-game-btn');
+    if (btn) btn.disabled = false;
+    const hint = document.getElementById('setup-hint');
+    if (hint) hint.textContent = '✅ Все корабли расставлены! Начинайте битву!';
+    haptic('tap');
+}
+
+function clearSetup() {
+    setup.board = createEmptyBoard();
+    setup.ships = [];
+    setup.currentShipIndex = 0;
+    createSetupGrid();
+    const btn = document.getElementById('start-game-btn');
+    if (btn) btn.disabled = true;
+    const hint = document.getElementById('setup-hint');
+    if (hint) hint.textContent = 'Нажмите на клетку, чтобы разместить корабль';
+    haptic('tap');
+}
+
+// ============ ОТРИСОВКА ПОЛЯ ДЛЯ ИГРЫ ============
+
+function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false) {
+    if (!boardElement) return;
+    boardElement.innerHTML = '';
+    const sunkShips = ships.filter(ship => ship.hits.length === ship.size);
+    const fragment = document.createDocumentFragment();
+
+    const corner = document.createElement('div');
+    corner.className = 'cell label corner';
+    fragment.appendChild(corner);
+
+    for (let c = 0; c < BOARD_SIZE; c++) {
+        const colLabel = document.createElement('div');
+        colLabel.className = 'cell label col-label';
+        colLabel.textContent = c + 1;
+        fragment.appendChild(colLabel);
+    }
+
     for (let i = 0; i < BOARD_SIZE; i++) {
         const rowLabel = document.createElement('div');
         rowLabel.className = 'cell label row-label';
@@ -338,7 +500,7 @@ function onCellClick(row, col) {
     if (result.hit) {
         if (result.sunk) {
             haptic('sunk');
-            updateStatus('player', '💥 Корабль потоплен! Вода вокруг закрашена! 🌊');
+            updateStatus('player', '💥 Корабль потоплен! ☠');
         } else {
             haptic('hit');
             updateStatus('player', '💥 Попадание! Ещё ход!');
@@ -354,9 +516,8 @@ function onCellClick(row, col) {
     setTimeout(() => computerTurn(), 800);
 }
 
-// ============ ИИ: ПОИСК КЛЕТОК "ПО КРЕСТУ" ПОСЛЕ ПОПАДАНИЯ ============
+// ============ ИИ КОМПЬЮТЕРА ============
 
-// Перемешивание массива (Fisher-Yates), чтобы порядок соседей был непредсказуем
 function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -380,17 +541,14 @@ function getCrossNeighbors(row, col) {
     ].filter(([r, c]) => isCellAvailable(game.playerBoard, r, c));
 }
 
-// После попадания обновляем очередь клеток-кандидатов для добивания корабля
 function updateTargetQueueAfterHit() {
     const hits = game.computerHits;
 
     if (hits.length === 1) {
-        // Первое попадание — пробуем все 4 клетки вокруг него
         game.computerTargetQueue = shuffle(getCrossNeighbors(hits[0][0], hits[0][1]));
         return;
     }
 
-    // Есть 2+ попаданий — вычисляем направление корабля и продолжаем именно по нему
     const sameRow = hits.every(([r]) => r === hits[0][0]);
     const sameCol = hits.every(([, c]) => c === hits[0][1]);
     const queue = [];
@@ -412,7 +570,6 @@ function updateTargetQueueAfterHit() {
             if (isCellAvailable(game.playerBoard, r, c)) queue.push([r, c]);
         });
     } else {
-        // На всякий случай (не должно происходить) — просто соседи последнего попадания
         const [r, c] = hits[hits.length - 1];
         queue.push(...getCrossNeighbors(r, c));
     }
@@ -420,12 +577,9 @@ function updateTargetQueueAfterHit() {
     game.computerTargetQueue = queue;
 }
 
-// ============ ХОД КОМПЬЮТЕРА ============
-
 function computerTurn() {
     if (game.gameOver) return;
 
-    // Сначала пытаемся добить уже обнаруженный корабль по кресту
     let row, col;
     while (game.computerTargetQueue.length > 0) {
         const [r, c] = game.computerTargetQueue.pop();
@@ -436,7 +590,6 @@ function computerTurn() {
         }
     }
 
-    // Если целей на добивание нет — стреляем в случайную доступную клетку
     if (row === undefined) {
         const available = [];
         for (let i = 0; i < BOARD_SIZE; i++) {
@@ -460,7 +613,6 @@ function computerTurn() {
     }
 
     const result = shoot(row, col, game.playerBoard, game.playerShips);
-
     updateBoards();
 
     if (result.win) {
@@ -473,7 +625,6 @@ function computerTurn() {
 
     if (result.hit) {
         if (result.sunk) {
-            // Корабль потоплен — сбрасываем память ИИ, добивать больше нечего
             game.computerHits = [];
             game.computerTargetQueue = [];
             haptic('sunk');
@@ -500,6 +651,7 @@ function computerTurn() {
 
 function updateStatus(turn, message) {
     const status = document.getElementById('status');
+    if (!status) return;
 
     if (turn === 'win') {
         status.textContent = '🎉 ПОБЕДА! Вы потопили все корабли!';
@@ -530,14 +682,25 @@ function updateBoards() {
     createGrid(computerGrid, game.computerBoard, game.computerShips, false, true);
 }
 
-// ============ НОВАЯ ИГРА ============
+// ============ НАЧАЛО ИГРЫ ============
 
-function newGame() {
-    haptic('tap');
+function startGame() {
+    console.log('startGame called');
+    
+    if (setup.ships.length < SHIP_SIZES.length) {
+        haptic('miss');
+        const hint = document.getElementById('setup-hint');
+        if (hint) hint.textContent = '❌ Расставьте все корабли!';
+        return;
+    }
 
-    const player = placeShipsRandom();
-    game.playerBoard = player.board;
-    game.playerShips = player.ships;
+    console.log('Starting game with', setup.ships.length, 'ships');
+
+    game.playerBoard = setup.board.map(row => [...row]);
+    game.playerShips = setup.ships.map(ship => ({ 
+        ...ship, 
+        hits: [...ship.hits] 
+    }));
 
     const computer = placeShipsRandom();
     game.computerBoard = computer.board;
@@ -548,8 +711,52 @@ function newGame() {
     game.computerHits = [];
     game.computerTargetQueue = [];
 
+    const setupScreen = document.getElementById('setup-screen');
+    const gameScreen = document.getElementById('game-screen');
+    
+    if (setupScreen) {
+        setupScreen.style.display = 'none';
+        setupScreen.classList.add('hidden');
+    }
+    if (gameScreen) {
+        gameScreen.style.display = 'block';
+        gameScreen.classList.add('visible');
+    }
+
     updateStatus('player', '🎯 Ваш ход!');
     updateBoards();
+    haptic('tap');
+}
+
+// ============ НОВАЯ ИГРА ============
+
+function newGame() {
+    console.log('newGame called');
+    
+    const gameScreen = document.getElementById('game-screen');
+    const setupScreen = document.getElementById('setup-screen');
+    
+    if (gameScreen) {
+        gameScreen.style.display = 'none';
+        gameScreen.classList.remove('visible');
+    }
+    if (setupScreen) {
+        setupScreen.style.display = 'block';
+        setupScreen.classList.remove('hidden');
+    }
+
+    setup.board = createEmptyBoard();
+    setup.ships = [];
+    setup.currentShipIndex = 0;
+    createSetupGrid();
+    
+    const btn = document.getElementById('start-game-btn');
+    if (btn) btn.disabled = true;
+    
+    const hint = document.getElementById('setup-hint');
+    if (hint) hint.textContent = 'Нажмите на клетку, чтобы разместить корабль';
+    
+    haptic('tap');
 }
 
 // ============ ЗАКРЫТИЕ ============
@@ -565,8 +772,36 @@ function closeApp() {
 // ============ ИНИЦИАЛИЗАЦИЯ ============
 
 window.onload = function () {
+    console.log('Page loaded');
     initTelegram();
-    newGame();
-    document.getElementById('new-game-btn').addEventListener('click', newGame);
-    document.getElementById('close-btn').addEventListener('click', closeApp);
+
+    setup.board = createEmptyBoard();
+    setup.ships = [];
+    createSetupGrid();
+    console.log('Setup grid created');
+
+    const startBtn = document.getElementById('start-game-btn');
+    if (startBtn) startBtn.disabled = true;
+
+    const rotateBtn = document.getElementById('rotate-btn');
+    if (rotateBtn) rotateBtn.addEventListener('click', rotateShips);
+    
+    const autoBtn = document.getElementById('auto-place-btn');
+    if (autoBtn) autoBtn.addEventListener('click', autoPlaceShips);
+    
+    const clearBtn = document.getElementById('clear-btn');
+    if (clearBtn) clearBtn.addEventListener('click', clearSetup);
+    
+    if (startBtn) startBtn.addEventListener('click', startGame);
+    
+    const newGameBtn = document.getElementById('new-game-btn');
+    if (newGameBtn) newGameBtn.addEventListener('click', newGame);
+    
+    const closeBtn = document.getElementById('close-btn');
+    if (closeBtn) closeBtn.addEventListener('click', closeApp);
+
+    const setupGrid = document.getElementById('setup-grid');
+    if (setupGrid) setupGrid.addEventListener('dblclick', toggleOrientation);
+
+    tg?.expand();
 };

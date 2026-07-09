@@ -5,12 +5,6 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-/* ============================================================
-   ТОКЕНЫ ТЕМЫ
-   Подхватываем цвета Telegram (var(--tg-theme-*) выставляются
-   telegram-web-app.js на :root), с "тетрадными" запасными
-   значениями для просмотра вне Telegram.
-   ============================================================ */
 :root {
     --tg-bg:        var(--tg-theme-bg-color, #efe7d3);
     --tg-secondary: var(--tg-theme-secondary-bg-color, #e3d9bc);
@@ -43,7 +37,6 @@
 
 html {
     height: 100%;
-    /* используем высоту вьюпорта, которую сообщает Telegram */
     height: var(--tg-viewport-stable-height, 100%);
 }
 
@@ -77,7 +70,6 @@ body {
     overflow: hidden;
 }
 
-/* Эффект тетрадного листа */
 #app::before {
     content: '';
     position: absolute;
@@ -172,6 +164,100 @@ body {
     50% { transform: scale(0.97); }
 }
 
+/* ============ ЭКРАН РАССТАНОВКИ ============ */
+#setup-screen {
+    display: block;
+}
+
+#setup-screen.hidden {
+    display: none !important;
+}
+
+#setup-info {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+#setup-info p {
+    margin: 3px 0;
+    font-size: 14px;
+}
+
+#setup-info #ships-left {
+    font-weight: 700;
+    color: var(--tg-button);
+    font-size: 16px;
+}
+
+#setup-info #setup-hint {
+    font-size: 12px;
+    color: var(--tg-hint);
+}
+
+#setup-info #orientation-hint {
+    font-size: 12px;
+    color: var(--tg-hint);
+    margin-top: 2px;
+}
+
+#setup-info #orientation-hint span {
+    font-weight: 700;
+    color: var(--tg-button);
+}
+
+#setup-controls {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+#setup-controls button {
+    flex: 1;
+    min-width: 60px;
+    max-width: 140px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease, background 0.2s ease;
+}
+
+#setup-controls button:active {
+    transform: scale(0.96);
+}
+
+.btn-rotate {
+    background: #f39c12;
+    color: white;
+}
+
+.btn-rotate:hover { opacity: 0.9; }
+.btn-rotate:active { background: #e67e22; }
+
+.btn-success {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-success:hover { opacity: 0.9; }
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============ ЭКРАН ИГРЫ ============ */
+#game-screen {
+    display: none !important;
+}
+
+#game-screen.visible {
+    display: block !important;
+}
+
 /* ---------- Поля ---------- */
 #game-container {
     display: flex;
@@ -193,9 +279,7 @@ body {
     text-transform: uppercase;
 }
 
-/* ---------- Сетка с координатами ----------
-   11x11: [0,0] пустой угол, [0,1..10] номера столбцов,
-   [1..10,0] буквы строк, остальное — игровые клетки. */
+/* ---------- Сетка с координатами ---------- */
 .grid {
     display: grid;
     grid-template-columns: 18px repeat(10, 1fr);
@@ -220,7 +304,6 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
-/* координатные подписи (не кликабельны) */
 .cell.label {
     background: transparent;
     color: var(--tg-hint);
@@ -234,7 +317,6 @@ body {
     background: transparent;
 }
 
-/* игровые клетки — квадратные, задают высоту всей строки */
 .cell.data {
     aspect-ratio: 1;
     background: var(--paper-frame);
@@ -243,7 +325,44 @@ body {
     min-height: 26px;
 }
 
-.cell.data:not(.hit):not(.miss):not(.sunk):not(.miss-around-sunk):not(.disabled):hover {
+/* ============ КЛЕТКИ ДЛЯ РАССТАНОВКИ ============ */
+.cell.data.setup-empty {
+    background: var(--paper-frame);
+    box-shadow: inset 0 0 0 1px rgba(138, 122, 90, 0.25);
+}
+
+.cell.data.setup-empty:hover {
+    background: #c4d4e8;
+    transform: scale(1.04);
+    z-index: 2;
+}
+
+.cell.data.setup-ship {
+    background: var(--ship) !important;
+    box-shadow: inset 0 0 0 1px var(--ship-dark);
+    border: 1px solid #1a252f;
+}
+
+.cell.data.setup-ship::after {
+    content: '⛵';
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.cell.data.setup-ship-placed {
+    background: var(--ship) !important;
+    box-shadow: inset 0 0 0 2px #27ae60, inset 0 0 0 1px var(--ship-dark);
+    border: 1px solid #1a252f;
+}
+
+.cell.data.setup-ship-placed::after {
+    content: '⛵';
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+/* ============ КЛЕТКИ ДЛЯ ИГРЫ ============ */
+.cell.data:not(.hit):not(.miss):not(.sunk):not(.miss-around-sunk):not(.disabled):not(.setup-empty):hover {
     background: #e8e0cd;
     transform: scale(1.04);
     z-index: 2;
@@ -253,7 +372,6 @@ body {
     transform: scale(0.94);
 }
 
-/* Корабль (виден только на своём поле) */
 .cell.data.ship {
     background: var(--ship);
     box-shadow: inset 0 0 0 1px var(--ship-dark);
@@ -265,7 +383,6 @@ body {
     opacity: 0.45;
 }
 
-/* Попадание */
 .cell.data.hit {
     background: var(--hit) !important;
     animation: hitAnim 0.3s ease;
@@ -279,7 +396,6 @@ body {
     font-weight: 900;
 }
 
-/* Промах */
 .cell.data.miss {
     background: var(--miss) !important;
     box-shadow: inset 0 0 0 1px rgba(138, 122, 90, 0.3);
@@ -302,7 +418,6 @@ body {
     color: var(--tg-hint);
 }
 
-/* Потопленный корабль */
 .cell.data.sunk {
     background: var(--sunk) !important;
     animation: sunkAnim 0.45s ease;
@@ -387,13 +502,6 @@ button:active {
 
 .btn-secondary:hover { opacity: 0.85; }
 
-/* фокус для клавиатурной навигации / доступности */
-button:focus-visible,
-.cell.data:focus-visible {
-    outline: 2px solid var(--tg-link);
-    outline-offset: 2px;
-}
-
 /* ---------- Адаптивность ---------- */
 @media (min-width: 640px) {
     #game-container {
@@ -437,7 +545,6 @@ button:focus-visible,
     }
 }
 
-/* уважение к reduced-motion */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation-duration: 0.001ms !important;

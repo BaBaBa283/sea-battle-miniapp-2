@@ -15,27 +15,47 @@
             <div id="status" class="player-turn">🎯 Ваш ход</div>
         </div>
 
-        <!-- Игровые поля -->
-        <div id="game-container">
-            <div id="player-board" class="board-block">
-                <h3>Ваше поле</h3>
-                <div id="player-grid" class="grid"></div>
+        <!-- Экран расстановки кораблей -->
+        <div id="setup-screen">
+            <div id="setup-info">
+                <p>🚢 Расставьте свои корабли</p>
+                <p id="ships-left">Осталось: 10 кораблей</p>
+                <p id="setup-hint">Нажмите на клетку, чтобы разместить корабль</p>
+                <p id="orientation-hint">📐 Ориентация: <span id="orientation-text">Горизонтальная</span></p>
             </div>
-
-            <div id="computer-board" class="board-block">
-                <h3>Поле противника</h3>
-                <div id="computer-grid" class="grid"></div>
+            <div id="setup-board" class="board-block">
+                <div id="setup-grid" class="grid"></div>
+            </div>
+            <div id="setup-controls">
+                <button id="rotate-btn" class="btn-rotate">🔄 Повернуть</button>
+                <button id="auto-place-btn" class="btn-primary">🎲 Автоматически</button>
+                <button id="clear-btn" class="btn-secondary">🗑 Очистить</button>
+                <button id="start-game-btn" class="btn-success" disabled>⚔️ Начать битву!</button>
             </div>
         </div>
 
-        <!-- Кнопки управления -->
-        <div id="controls">
-            <button id="new-game-btn" class="btn-primary">
-                <span class="btn-icon">🔄</span><span>Новая игра</span>
-            </button>
-            <button id="close-btn" class="btn-secondary">
-                <span class="btn-icon">⬅️</span><span>Закрыть</span>
-            </button>
+        <!-- Экран игры (скрыт по умолчанию) -->
+        <div id="game-screen" style="display: none;">
+            <div id="game-container">
+                <div id="player-board" class="board-block">
+                    <h3>Ваше поле</h3>
+                    <div id="player-grid" class="grid"></div>
+                </div>
+
+                <div id="computer-board" class="board-block">
+                    <h3>Поле противника</h3>
+                    <div id="computer-grid" class="grid"></div>
+                </div>
+            </div>
+
+            <div id="controls">
+                <button id="new-game-btn" class="btn-primary">
+                    <span class="btn-icon">🔄</span><span>Новая игра</span>
+                </button>
+                <button id="close-btn" class="btn-secondary">
+                    <span class="btn-icon">⬅️</span><span>Закрыть</span>
+                </button>
+            </div>
         </div>
     </div>
 
