@@ -20,12 +20,10 @@ let game = {
 
 // ============ ФУНКЦИИ ИГРЫ ============
 
-// Создание пустого поля
 function createEmptyBoard() {
     return Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0));
 }
 
-// Получение координат корабля
 function getShipCoords(ship) {
     const coords = [];
     const { row, col, size, horizontal } = ship;
@@ -39,7 +37,6 @@ function getShipCoords(ship) {
     return coords;
 }
 
-// Проверка возможности размещения корабля
 function canPlaceShip(board, row, col, size, horizontal) {
     if (horizontal && col + size > BOARD_SIZE) return false;
     if (!horizontal && row + size > BOARD_SIZE) return false;
@@ -62,7 +59,6 @@ function canPlaceShip(board, row, col, size, horizontal) {
     return true;
 }
 
-// Размещение корабля на поле
 function placeShip(board, row, col, size, horizontal) {
     for (let i = 0; i < size; i++) {
         const r = horizontal ? row : row + i;
@@ -71,7 +67,6 @@ function placeShip(board, row, col, size, horizontal) {
     }
 }
 
-// Расстановка кораблей (рандомная)
 function placeShipsRandom() {
     const board = createEmptyBoard();
     const ships = [];
@@ -101,7 +96,6 @@ function placeShipsRandom() {
     return { board, ships };
 }
 
-// Проверка победы
 function checkWin(board, ships) {
     for (const ship of ships) {
         if (ship.hits.length < ship.size) {
@@ -111,26 +105,22 @@ function checkWin(board, ships) {
     return true;
 }
 
-// ============ ЗАКРАШИВАНИЕ КЛЕТОК ВОКРУГ ПОТОПЛЕННОГО КОРАБЛЯ ============
+// ============ ЗАКРАШИВАНИЕ ВОКРУГ ПОТОПЛЕННОГО ============
 
 function markSurroundingCells(row, col, ship, board) {
     const coords = getShipCoords(ship);
     const markedCells = new Set();
     
-    // Проходим по всем клеткам вокруг корабля
     for (const [r, c] of coords) {
-        // Проверяем все 8 соседних клеток
         for (let dr = -1; dr <= 1; dr++) {
             for (let dc = -1; dc <= 1; dc++) {
                 const nr = r + dr;
                 const nc = c + dc;
                 
-                // Проверяем, что клетка в пределах поля
                 if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
                     const key = `${nr},${nc}`;
                     if (!markedCells.has(key)) {
                         const value = board[nr][nc];
-                        // Если клетка пустая или корабль (но не потоплена) - помечаем как промах
                         if (value === 0 || value === 1 || value === 'ship') {
                             board[nr][nc] = 'miss-around-sunk';
                             markedCells.add(key);
@@ -142,7 +132,6 @@ function markSurroundingCells(row, col, ship, board) {
     }
 }
 
-// Проверка, находится ли клетка вокруг потопленного корабля
 function isCellAroundSunk(row, col, sunkShips) {
     for (const ship of sunkShips) {
         const coords = getShipCoords(ship);
@@ -180,11 +169,9 @@ function shoot(row, col, board, ships) {
             
             if (ship.hits.length === ship.size) {
                 sunk = true;
-                // Помечаем все палубы как потопленные
                 for (const [r, c] of coords) {
                     board[r][c] = 'sunk';
                 }
-                // Закрашиваем клетки вокруг корабля
                 markSurroundingCells(row, col, ship, board);
             }
             shipIndex = s;
@@ -204,9 +191,42 @@ function shoot(row, col, board, ships) {
 
 function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false) {
     boardElement.innerHTML = '';
-    boardElement.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
     
-    // Собираем все потопленные корабли
+    const wrapper = document.createElement('div');
+    wrapper.className = 'board-wrapper';
+    
+    // Верхние цифры
+    const topLabels = document.createElement('div');
+    topLabels.className = 'board-top-labels';
+    const corner = document.createElement('div');
+    corner.className = 'corner';
+    topLabels.appendChild(corner);
+    for (let i = 1; i <= BOARD_SIZE; i++) {
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = i;
+        topLabels.appendChild(label);
+    }
+    wrapper.appendChild(topLabels);
+    
+    // Буквы слева + сетка
+    const boardWithLabels = document.createElement('div');
+    boardWithLabels.className = 'board-with-labels';
+    
+    const leftLabels = document.createElement('div');
+    leftLabels.className = 'board-left-labels';
+    for (let i = 0; i < BOARD_SIZE; i++) {
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = LETTERS[i];
+        leftLabels.appendChild(label);
+    }
+    boardWithLabels.appendChild(leftLabels);
+    
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
+    
     const sunkShips = ships.filter(ship => ship.hits.length === ship.size);
     
     for (let i = 0; i < BOARD_SIZE; i++) {
@@ -218,7 +238,6 @@ function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false)
             
             const value = board[i][j];
             
-            // Определяем состояние клетки
             if (value === 1 || value === 'ship') {
                 if (isPlayerBoard) {
                     cell.classList.add('ship');
@@ -235,8 +254,6 @@ function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false)
                 cell.classList.add('miss-around-sunk');
             }
             
-            // Проверяем, не находится ли клетка вокруг потопленного корабля
-            // (для случая, когда клетка была помечена как miss, но должна быть miss-around-sunk)
             if (value === 'miss' && !isPlayerBoard) {
                 const isAroundSunk = isCellAroundSunk(i, j, sunkShips);
                 if (isAroundSunk) {
@@ -245,7 +262,6 @@ function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false)
                 }
             }
             
-            // Если это поле противника и можно кликать
             if (!isPlayerBoard && canClick && !game.gameOver && game.currentTurn === 'player') {
                 if (value !== 'hit' && value !== 'miss' && value !== 'sunk' && value !== 'miss-around-sunk') {
                     cell.style.cursor = 'pointer';
@@ -257,9 +273,13 @@ function createGrid(boardElement, board, ships, isPlayerBoard, canClick = false)
                 cell.classList.add('disabled');
             }
             
-            boardElement.appendChild(cell);
+            grid.appendChild(cell);
         }
     }
+    
+    boardWithLabels.appendChild(grid);
+    wrapper.appendChild(boardWithLabels);
+    boardElement.appendChild(wrapper);
 }
 
 // ============ ОБРАБОТКА КЛИКА ============
@@ -270,7 +290,6 @@ function onCellClick(row, col) {
     const board = game.computerBoard;
     if (board[row][col] === 'hit' || board[row][col] === 'miss' || board[row][col] === 'sunk' || board[row][col] === 'miss-around-sunk') return;
     
-    // Выстрел игрока
     const result = shoot(row, col, game.computerBoard, game.computerShips);
     updateBoards();
     
@@ -283,19 +302,18 @@ function onCellClick(row, col) {
     
     if (result.hit) {
         if (result.sunk) {
-            updateStatus('player', '💥 Корабль потоплен! Вода вокруг закрашена! 🌊');
+            updateStatus('player', '💥 Корабль потоплен! ☠');
         } else {
             updateStatus('player', '💥 Попадание! Ещё ход!');
         }
         return;
     }
     
-    // Промах - ход компьютера
     updateStatus('computer', '🌊 Промах! Ход компьютера...');
     game.currentTurn = 'computer';
     updateBoards();
     
-    setTimeout(() => computerTurn(), 800);
+    setTimeout(() => computerTurn(), 700);
 }
 
 // ============ ХОД КОМПЬЮТЕРА ============
@@ -303,7 +321,6 @@ function onCellClick(row, col) {
 function computerTurn() {
     if (game.gameOver) return;
     
-    // Находим доступные клетки
     const available = [];
     for (let i = 0; i < BOARD_SIZE; i++) {
         for (let j = 0; j < BOARD_SIZE; j++) {
@@ -322,7 +339,6 @@ function computerTurn() {
         return;
     }
     
-    // Выбираем случайную клетку
     const [row, col] = available[Math.floor(Math.random() * available.length)];
     const result = shoot(row, col, game.playerBoard, game.playerShips);
     
@@ -337,13 +353,13 @@ function computerTurn() {
     
     if (result.hit) {
         if (result.sunk) {
-            updateStatus('computer', `💥 Компьютер потопил корабль! (${LETTERS[row]}${col+1})`);
+            updateStatus('computer', `💥 Компьютер потопил! (${LETTERS[row]}${col+1})`);
         } else {
-            updateStatus('computer', `💥 Компьютер попал! (${LETTERS[row]}${col+1})`);
+            updateStatus('computer', `💥 Попал! (${LETTERS[row]}${col+1})`);
         }
-        setTimeout(() => computerTurn(), 600);
+        setTimeout(() => computerTurn(), 500);
     } else {
-        updateStatus('player', `🌊 Компьютер промахнулся! (${LETTERS[row]}${col+1})`);
+        updateStatus('player', `🌊 Промах! (${LETTERS[row]}${col+1})`);
         game.currentTurn = 'player';
         setTimeout(() => {
             updateStatus('player', '🎯 Ваш ход!');
@@ -358,11 +374,11 @@ function updateStatus(turn, message) {
     const status = document.getElementById('status');
     
     if (turn === 'win') {
-        status.textContent = '🎉 ПОБЕДА! Вы потопили все корабли!';
+        status.textContent = '🎉 ПОБЕДА! Все корабли потоплены!';
         status.className = 'game-over-win';
         return;
     } else if (turn === 'lose') {
-        status.textContent = '💀 ПОРАЖЕНИЕ! Компьютер победил...';
+        status.textContent = '💀 ПОРАЖЕНИЕ... Компьютер победил';
         status.className = 'game-over-lose';
         return;
     }
@@ -389,12 +405,10 @@ function updateBoards() {
 // ============ НОВАЯ ИГРА ============
 
 function newGame() {
-    // Игрок
     const player = placeShipsRandom();
     game.playerBoard = player.board;
     game.playerShips = player.ships;
     
-    // Компьютер
     const computer = placeShipsRandom();
     game.computerBoard = computer.board;
     game.computerShips = computer.ships;
@@ -418,9 +432,9 @@ window.onload = function() {
     newGame();
     document.getElementById('new-game-btn').addEventListener('click', newGame);
     document.getElementById('close-btn').addEventListener('click', closeApp);
+    tg.expand();
 };
 
-// Обновляем размер при изменении
 tg.onEvent('viewportChanged', function() {
     tg.expand();
 });

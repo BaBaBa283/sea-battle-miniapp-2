@@ -4,6 +4,11 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     font-family: 'Segoe UI', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
     background: #d4c9a8;
@@ -11,26 +16,32 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 4px;
     margin: 0;
     background-image: 
         linear-gradient(rgba(200, 180, 140, 0.3) 1px, transparent 1px),
         linear-gradient(90deg, rgba(200, 180, 140, 0.3) 1px, transparent 1px);
     background-size: 20px 20px;
+    overflow: hidden;
 }
 
 #app {
-    max-width: 950px;
+    max-width: 500px;
     width: 100%;
+    height: 100vh;
+    max-height: 700px;
     background: #f5f0e8;
-    border-radius: 8px;
-    padding: 24px;
+    border-radius: 6px;
+    padding: 8px 10px;
     box-shadow: 
         0 4px 20px rgba(0, 0, 0, 0.3),
         inset 0 0 0 2px #e8e0d0,
         inset 0 0 0 4px #d4c9a8;
     border: 1px solid #b8a88a;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 /* Эффект тетрадного листа */
@@ -46,7 +57,7 @@ body {
         linear-gradient(90deg, rgba(180, 160, 130, 0.08) 1px, transparent 1px);
     background-size: 20px 20px;
     pointer-events: none;
-    border-radius: 8px;
+    border-radius: 6px;
     z-index: 0;
 }
 
@@ -58,9 +69,10 @@ body {
 /* Красная линия как в тетради */
 #header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 4px;
     position: relative;
-    padding-bottom: 12px;
+    padding-bottom: 4px;
+    flex-shrink: 0;
 }
 
 #header::after {
@@ -75,38 +87,43 @@ body {
 }
 
 #header h1 {
-    font-size: 32px;
+    font-size: 16px;
     font-weight: 700;
     color: #2c3e50;
     font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
-    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.05);
-    letter-spacing: 2px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
+    letter-spacing: 1px;
     position: relative;
     display: inline-block;
+    line-height: 1.2;
 }
 
 #header h1::before {
     content: '✏️';
-    margin-right: 8px;
+    margin-right: 4px;
+    font-size: 14px;
 }
 
 #header h1::after {
     content: '📓';
-    margin-left: 8px;
+    margin-left: 4px;
+    font-size: 14px;
 }
 
 #status {
-    font-size: 18px;
+    font-size: 12px;
     font-weight: 600;
-    padding: 8px 24px;
-    border-radius: 4px;
+    padding: 3px 12px;
+    border-radius: 3px;
     display: inline-block;
     background: rgba(255, 255, 255, 0.7);
     color: #2c3e50;
     border: 2px solid #b8a88a;
     font-family: 'Courier New', monospace;
-    min-width: 180px;
+    min-width: 100px;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-top: 2px;
+    line-height: 1.2;
 }
 
 #status.player-turn {
@@ -148,54 +165,124 @@ body {
 #game-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 24px;
+    gap: 8px;
     justify-content: center;
-    margin: 20px 0;
+    flex: 1;
+    min-height: 0;
+    align-content: center;
+    margin: 2px 0;
 }
 
 #player-board, #computer-board {
     flex: 1;
-    min-width: 300px;
+    min-width: 160px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #player-board h3, #computer-board h3 {
-    margin-bottom: 10px;
-    font-size: 16px;
+    margin-bottom: 2px;
+    font-size: 10px;
     color: #2c3e50;
     font-weight: 600;
     font-family: 'Courier New', monospace;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     background: rgba(255, 255, 255, 0.5);
     display: inline-block;
-    padding: 4px 16px;
-    border-radius: 4px;
+    padding: 1px 8px;
+    border-radius: 3px;
     border: 1px dashed #b8a88a;
+    line-height: 1.4;
 }
 
 #player-board h3::before {
     content: '🚢 ';
+    font-size: 10px;
 }
 
 #computer-board h3::before {
     content: '🎯 ';
+    font-size: 10px;
 }
 
-/* Стиль клетчатого поля */
+/* КОНТЕЙНЕР С НУМЕРАЦИЕЙ */
+.board-wrapper {
+    display: inline-block;
+    padding: 2px;
+    background: #f5f0e8;
+    border-radius: 3px;
+    width: 100%;
+    max-width: 280px;
+}
+
+/* Цифры сверху (1-10) */
+.board-top-labels {
+    display: grid;
+    grid-template-columns: 14px repeat(10, 1fr);
+    gap: 1px;
+    margin-bottom: 1px;
+    padding-left: 1px;
+}
+
+.board-top-labels .corner {
+    grid-column: 1;
+}
+
+.board-top-labels .label {
+    font-size: 7px;
+    font-weight: 600;
+    color: #7f8c8d;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    padding: 0;
+    line-height: 1;
+}
+
+/* Буквы слева (A-J) */
+.board-with-labels {
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    gap: 1px;
+    align-items: start;
+}
+
+.board-left-labels {
+    display: grid;
+    grid-template-rows: repeat(10, 1fr);
+    gap: 1px;
+    padding-top: 0;
+}
+
+.board-left-labels .label {
+    font-size: 7px;
+    font-weight: 600;
+    color: #7f8c8d;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 16px;
+    line-height: 1;
+}
+
+/* Стиль клетчатого поля (максимально компактный) */
 .grid {
     display: inline-grid;
     grid-template-columns: repeat(10, 1fr);
     gap: 1px;
     background: #b8a88a;
-    padding: 2px;
-    border-radius: 4px;
-    border: 3px solid #8a7a5a;
-    max-width: 400px;
+    padding: 1px;
+    border-radius: 2px;
+    border: 2px solid #8a7a5a;
     width: 100%;
+    max-width: 280px;
     box-shadow: 
-        inset 0 0 10px rgba(0, 0, 0, 0.1),
-        0 4px 15px rgba(0, 0, 0, 0.2);
+        inset 0 0 8px rgba(0, 0, 0, 0.1),
+        0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
 .cell {
@@ -203,27 +290,27 @@ body {
     background: #f5f0e8;
     border-radius: 1px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.1s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 11px;
     font-weight: bold;
     color: #2c3e50;
     user-select: none;
-    min-height: 28px;
+    min-height: 14px;
     position: relative;
     font-family: 'Courier New', monospace;
 }
 
 .cell:hover:not(.hit):not(.miss):not(.sunk):not(.miss-around-sunk):not(.disabled) {
     background: #e8e0d0;
-    transform: scale(1.03);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
     z-index: 2;
 }
 
-/* Корабль (виден только на своём поле) */
+/* Корабль */
 .cell.ship {
     background: #34495e;
     border: 1px solid #2c3e50;
@@ -232,27 +319,27 @@ body {
 
 .cell.ship::after {
     content: '⛵';
-    font-size: 12px;
+    font-size: 8px;
     opacity: 0.4;
 }
 
-/* Попадание - закрашенная клетка с крестиком */
+/* Попадание */
 .cell.hit {
     background: #c0392b !important;
-    animation: hitAnim 0.3s ease;
+    animation: hitAnim 0.25s ease;
     border: 1px solid #922b21;
-    box-shadow: inset 0 0 20px rgba(192, 57, 43, 0.3);
+    box-shadow: inset 0 0 12px rgba(192, 57, 43, 0.3);
 }
 
 .cell.hit::after {
     content: '✕';
-    font-size: 20px;
+    font-size: 12px;
     color: white;
     font-weight: 900;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Промах - закрашенная клетка с точкой */
+/* Промах */
 .cell.miss {
     background: #d5d0c4 !important;
     border: 1px solid #b8a88a;
@@ -260,36 +347,36 @@ body {
 
 .cell.miss::after {
     content: '•';
-    font-size: 24px;
+    font-size: 14px;
     color: #8a7a5a;
 }
 
-/* Промах вокруг потопленного корабля - такой же как обычный промах */
+/* Промах вокруг потопленного */
 .cell.miss-around-sunk {
     background: #d5d0c4 !important;
     border: 1px solid #b8a88a;
-    animation: rippleEffect 0.6s ease;
+    animation: rippleEffect 0.4s ease;
 }
 
 .cell.miss-around-sunk::after {
     content: '•';
-    font-size: 24px;
+    font-size: 14px;
     color: #8a7a5a;
 }
 
-/* ★★★ ПОТОПЛЕННЫЙ КОРАБЛЬ - С ЧЕРЕПОМ ☠ ★★★ */
+/* Потопленный корабль с черепом */
 .cell.sunk {
     background: #2c3e50 !important;
-    animation: sunkAnim 0.5s ease;
+    animation: sunkAnim 0.4s ease;
     border: 1px solid #1a252f;
-    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .cell.sunk::after {
     content: '☠';
-    font-size: 22px;
+    font-size: 14px;
     color: #e74c3c;
-    text-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
 }
 
 .cell.disabled {
@@ -299,13 +386,13 @@ body {
 
 @keyframes hitAnim {
     0% { transform: scale(0.7); background: #e74c3c; }
-    50% { transform: scale(1.15); }
+    50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
 
 @keyframes sunkAnim {
     0% { transform: scale(0.8) rotate(-5deg); background: #34495e; }
-    30% { transform: scale(1.15) rotate(5deg); background: #2c3e50; }
+    30% { transform: scale(1.08) rotate(5deg); background: #2c3e50; }
     70% { transform: scale(0.95) rotate(-3deg); }
     100% { transform: scale(1) rotate(0deg); background: #2c3e50; }
 }
@@ -316,7 +403,7 @@ body {
         background: #b8a88a;
     }
     50% {
-        transform: scale(1.1);
+        transform: scale(1.06);
         background: #c4b89a;
     }
     100% {
@@ -327,25 +414,27 @@ body {
 
 #controls {
     display: flex;
-    gap: 12px;
+    gap: 6px;
     justify-content: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
+    margin-top: 4px;
+    flex-shrink: 0;
+    padding-bottom: 2px;
 }
 
 button {
-    padding: 12px 28px;
+    padding: 5px 14px;
     border: 2px solid #8a7a5a;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: 3px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-family: 'Courier New', monospace;
     letter-spacing: 0.5px;
     background: #f5f0e8;
     color: #2c3e50;
     box-shadow: 0 2px 0 #8a7a5a;
+    line-height: 1.2;
 }
 
 button:active {
@@ -355,7 +444,7 @@ button:active {
 
 button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 0 #8a7a5a;
+    box-shadow: 0 3px 0 #8a7a5a;
     background: #fff8ee;
 }
 
@@ -368,7 +457,7 @@ button:hover {
 
 .btn-primary:hover {
     background: #3d566e;
-    box-shadow: 0 4px 0 #2c3e50;
+    box-shadow: 0 3px 0 #2c3e50;
 }
 
 .btn-secondary {
@@ -380,80 +469,184 @@ button:hover {
 
 .btn-secondary:hover {
     background: #ef5343;
-    box-shadow: 0 4px 0 #c0392b;
+    box-shadow: 0 3px 0 #c0392b;
 }
 
-/* Адаптивность */
-@media (max-width: 700px) {
-    #game-container {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    #player-board, #computer-board {
-        min-width: auto;
-    }
-    
-    .grid {
-        max-width: 100%;
-    }
-    
-    .cell {
-        min-height: 24px;
-        font-size: 14px;
-    }
-    
-    .cell.hit::after, .cell.miss::after, .cell.sunk::after, .cell.miss-around-sunk::after {
-        font-size: 16px;
+/* Адаптивность для маленьких телефонов */
+@media (max-width: 500px) {
+    #app {
+        max-height: 600px;
+        padding: 4px 6px;
     }
     
     #header h1 {
-        font-size: 24px;
+        font-size: 14px;
+    }
+    
+    #header h1::before, #header h1::after {
+        font-size: 11px;
     }
     
     #status {
-        font-size: 15px;
-        padding: 6px 16px;
-        min-width: 140px;
+        font-size: 10px;
+        padding: 2px 8px;
+        min-width: 80px;
+    }
+    
+    .board-wrapper {
+        max-width: 200px;
+    }
+    
+    .grid {
+        max-width: 200px;
+    }
+    
+    .cell {
+        min-height: 12px;
+        font-size: 9px;
+    }
+    
+    .cell.hit::after, .cell.miss::after, .cell.miss-around-sunk::after {
+        font-size: 10px;
+    }
+    
+    .cell.sunk::after {
+        font-size: 11px;
+    }
+    
+    .cell.ship::after {
+        font-size: 7px;
+    }
+    
+    .board-top-labels .label {
+        font-size: 6px;
+    }
+    
+    .board-left-labels .label {
+        font-size: 6px;
+        min-height: 12px;
+    }
+    
+    .board-top-labels {
+        grid-template-columns: 11px repeat(10, 1fr);
+    }
+    
+    .board-with-labels {
+        grid-template-columns: 11px 1fr;
+    }
+    
+    #player-board h3, #computer-board h3 {
+        font-size: 8px;
+    }
+    
+    #player-board h3::before, #computer-board h3::before {
+        font-size: 8px;
     }
     
     button {
-        padding: 10px 20px;
-        font-size: 14px;
+        padding: 4px 10px;
+        font-size: 9px;
+    }
+    
+    #game-container {
+        gap: 4px;
     }
 }
 
 @media (max-width: 400px) {
-    .cell {
-        min-height: 20px;
+    #app {
+        max-height: 520px;
+        padding: 3px 4px;
+        border-radius: 4px;
+    }
+    
+    #header h1 {
         font-size: 12px;
     }
     
-    .cell.hit::after, .cell.miss::after, .cell.sunk::after, .cell.miss-around-sunk::after {
-        font-size: 14px;
+    #header h1::before, #header h1::after {
+        font-size: 10px;
     }
     
-    #app {
-        padding: 12px;
+    #status {
+        font-size: 9px;
+        padding: 2px 6px;
+        min-width: 70px;
     }
-}
-
-@media (max-height: 700px) {
-    #game-container {
-        gap: 12px;
+    
+    .board-wrapper {
+        max-width: 170px;
     }
     
     .grid {
-        padding: 2px;
+        max-width: 170px;
+        padding: 1px;
         gap: 1px;
     }
     
     .cell {
-        min-height: 18px;
+        min-height: 10px;
+        font-size: 8px;
+    }
+    
+    .cell.hit::after, .cell.miss::after, .cell.miss-around-sunk::after {
+        font-size: 8px;
+    }
+    
+    .cell.sunk::after {
+        font-size: 9px;
+    }
+    
+    .cell.ship::after {
+        font-size: 6px;
+    }
+    
+    .board-top-labels .label {
+        font-size: 5px;
+    }
+    
+    .board-left-labels .label {
+        font-size: 5px;
+        min-height: 10px;
+    }
+    
+    .board-top-labels {
+        grid-template-columns: 10px repeat(10, 1fr);
+        gap: 0.5px;
+    }
+    
+    .board-with-labels {
+        grid-template-columns: 10px 1fr;
+        gap: 0.5px;
+    }
+    
+    #player-board h3, #computer-board h3 {
+        font-size: 7px;
+        padding: 0 4px;
+    }
+    
+    #player-board h3::before, #computer-board h3::before {
+        font-size: 7px;
+    }
+    
+    button {
+        padding: 3px 8px;
+        font-size: 8px;
+        border-width: 1px;
+        box-shadow: 0 1px 0 #8a7a5a;
+    }
+    
+    #game-container {
+        gap: 3px;
+    }
+    
+    #controls {
+        gap: 4px;
+        margin-top: 2px;
     }
 }
 
-/* Эффект "рваного" края как у тетради */
+/* Эффект "рваного" края */
 #app::after {
     content: '';
     position: absolute;
@@ -469,5 +662,5 @@ button:hover {
             rgba(138, 122, 90, 0.03) 11px
         );
     pointer-events: none;
-    border-radius: 8px;
+    border-radius: 6px;
 }
